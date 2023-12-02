@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'listen'
+
+class HarbrCLI < Thor
+  DEFAULT_DIRECTORY = '/var/harbr'
+  @@listener = nil
+
+  no_commands do
+    def check_and_create_directory(path)
+      unless Dir.exist?(path)
+        puts "Creating directory: #{path}"
+        FileUtils.mkdir_p(path)
+      end
+    end
+
+    def command_exists?(command)
+      system("command -v #{command} > /dev/null 2>&1")
+    end
+
+    def install_with_snap(package)
+      puts "Installing #{package} using Snap..."
+      system("sudo snap install #{package}") or raise "Failed to install #{package}"
+    end
+  end
+
+  desc "setup", "Set up Harbr environment"
+  def setup
+    # Check and create /var/harbr directory
+    check_and_create_directory('/var/harbr')
+
+    # Check for Ruby, Traefik, and runit, and install if necessary
+    install_with_snap('ruby') unless command_exists?('ruby')
+    install_with_snap('traefik') unless command_exists?('traefik')
+    install_with_snap('runit') unless command_exists?('runit')
+
+    puts "Setup completed successfully."
+  end
+  desc "start [DIRECTORY]", "Start listening to a directory for changes"
+  def start(directory = DEFAULT_DIRECTORY)
+    return if @@listener
+
+    puts "Starting Harbr, listening to #{directory}"
+    @@listener = Listen.to(directory) do |modified, added, removed|
+      puts "Modified: #{modified}" unless modified.empty?
+      puts "Added: #{added}" unless added.empty?
+      puts "Removed: #{removed}" unless removed.empty?
+      # Add your logic here for handling these changes
+    end
+    @@listener.start # not blocking
+    sleep
+  end
+
+  desc "stop", "Stop Harbr"
+  def stop
+    if @@listener
+      @@listener.stop
+      @@listener = nil
+      puts "Harbr has been stopped."
+    else
+      puts "Harbr is not running."
+    end
+  end
+
+  desc "pause", "Pause Harbr"
+  def pause
+    if @@listener
+      @@listener.pause
+      puts "Harbr has been paused."
+    else
+      puts "Harbr is not running or already paused."
+    end
+  end
+
+  desc "resume", "Resume Harbr"
+  def resume
+    if @@listener
+      @@listener.start
+      puts "Harbr has been resumed."
+    else
+      puts "Harbr is not running or already active."
+    end
+  end
+end
+
+HarbrCLI.start(ARGV)
+
