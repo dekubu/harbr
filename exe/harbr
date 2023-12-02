@@ -51,6 +51,8 @@ class HarbrCLI < Thor
       puts "Modified: #{modified}" unless modified.empty?
       puts "Added: #{added}" unless added.empty?
       puts "Removed: #{removed}" unless removed.empty?
+
+      puts directory
       # Add your logic here for handling these changes
     end
     @@listener.start # not blocking
