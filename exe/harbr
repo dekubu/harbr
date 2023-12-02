@@ -22,6 +22,12 @@ class HarbrCLI < Thor
       puts "Installing #{package} using Snap..."
       system("sudo snap install #{package}") or raise "Failed to install #{package}"
     end
+
+    def install_with_apt(package)
+      puts "Installing #{package} using apt..."
+      system("sudo apt install #{package}") or raise "Failed to install #{package}"
+    end
+
   end
 
   desc "setup", "Set up Harbr environment"
@@ -32,7 +38,7 @@ class HarbrCLI < Thor
     # Check for Ruby, Traefik, and runit, and install if necessary
     install_with_snap('ruby') unless command_exists?('ruby')
     install_with_snap('traefik') unless command_exists?('traefik')
-    install_with_snap('runit') unless command_exists?('runit')
+    install_with_apt('runit') unless command_exists?('runit')
 
     puts "Setup completed successfully."
   end
