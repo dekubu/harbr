@@ -1,21 +1,22 @@
 # frozen_string_literal: true
 require_relative "harbr/version"
 require 'dddr'
+require 'sucker_punch'
 
 module Harbr
   class Error < StandardError; end
-
-  class Job
-    include SuckerPunch::Job
-  
-    def perform(config)
-
-      puts "Harbr Job!"
-      puts config
-
-    end
-  end
    class Container
+    class Job
+      include SuckerPunch::Job
+    
+      def perform(config)
+  
+        puts "Harbr Job!"
+        puts config
+  
+      end
+    end
+
     include Dddr::Entity
     attr_accessor :name, :host_header, :ip, :port  
    end

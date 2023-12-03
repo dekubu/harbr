@@ -3,6 +3,7 @@ require 'thor'
 require 'listen'
 require 'dddr'
 require 'harbr'
+require 'sucker_punch'
 require 'terminal-table'
 
 class HarbrCLI < Thor
@@ -83,10 +84,7 @@ class HarbrCLI < Thor
         next if added.first.include? ".git"
         /\/var\/harbr\/(?<container>.+)\/.*/.match(added.first)  
         config = "/var/harbr/#{$1}/config/manifest.yml"
-
-        Harbr::Job.perform_async(config)
-        
-        puts config
+        Harbr::Container::Job.perform_async(config)
       end
 
       # unless removed.empty?
