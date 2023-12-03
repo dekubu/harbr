@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 require 'thor'
 require 'listen'
+require 'dddr'
 
+Dddr.configure do |config|
+  config.data_dir = "/var/harbr/.data"
+end
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = '/var/harbr'
   @@listener = nil
