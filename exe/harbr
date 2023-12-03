@@ -3,12 +3,15 @@ require 'thor'
 require 'listen'
 require 'dddr'
 
-Dddr.configure do |config|
-  config.data_dir = "/var/harbr/.data"
-end
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = '/var/harbr'
+  DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
   @@listener = nil
+
+  Dddr.configure do |config|
+    config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
+  end
+
 
   no_commands do
     def check_and_create_directory(path)
