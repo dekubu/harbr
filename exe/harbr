@@ -2,6 +2,8 @@
 require 'thor'
 require 'listen'
 require 'dddr'
+require 'harbr'
+require 'terminal-table'
 
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = '/var/harbr'
@@ -14,6 +16,22 @@ class HarbrCLI < Thor
 
 
   no_commands do
+
+    def display_containers_table(containers)
+      return puts "No containers available." if containers.empty?
+
+      # Define headers based on Container attributes
+      headers = ['Name', 'Host Header', 'IP', 'Port']
+
+      rows = containers.map do |container|
+        [container.name, container.host_header, container.ip, container.port]
+      end
+
+      table = ::Terminal::Table.new(headings: headers, rows: rows)
+      puts table
+    end
+
+
     def check_and_create_directory(path)
       unless Dir.exist?(path)
         puts "Creating directory: #{path}"
@@ -96,6 +114,22 @@ class HarbrCLI < Thor
       puts "Harbr is not running or already active."
     end
   end
+
+  desc "containers", "show all containers"
+  def containers
+
+    container_repo = Harbr::Container::Repository.new
+    container = Harbr::Container.new
+    container.name =  "vidtreon"
+    container.host_header = "vidtreon.harbr.zero2one.ee"
+    container.ip = "127.0.0.1"
+    container.port = "9393"
+
+    container_repo.create(container)
+
+    display_containers_table(container_repo.all)
+  end
+
 end
 
 HarbrCLI.start(ARGV)
