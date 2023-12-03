@@ -4,6 +4,17 @@ require 'dddr'
 
 module Harbr
   class Error < StandardError; end
+
+  class Job
+    include SuckerPunch::Job
+  
+    def perform(config)
+
+      puts "Harbr Job!"
+      puts config
+
+    end
+  end
    class Container
     include Dddr::Entity
     attr_accessor :name, :host_header, :ip, :port  

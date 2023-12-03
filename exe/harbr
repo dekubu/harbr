@@ -84,9 +84,9 @@ class HarbrCLI < Thor
         /\/var\/harbr\/(?<container>.+)\/.*/.match(added.first)  
         config = "/var/harbr/#{$1}/config/manifest.yml"
 
+        Harbr::Job.perform_async(config)
         
         puts config
-
       end
 
       # unless removed.empty?
