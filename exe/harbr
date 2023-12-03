@@ -76,13 +76,28 @@ class HarbrCLI < Thor
     return if @@listener
 
     puts "Starting Harbr, listening to #{directory}"
+    
     @@listener = Listen.to(directory) do |modified, added, removed|
-      puts "Modified: #{modified}" unless modified.empty?
-      puts "Added: #{added}" unless added.empty?
-      puts "Removed: #{removed}" unless removed.empty?
+      unless added.empty?
+        next if added.first.include? "vendor"
+        next if added.first.include? ".git"
+        /\/var\/harbr\/(?<container>.+)\/.*/.match(added.first)  
+        config = "/var/harbr/#{$1}/config/manifest.yml"
 
-      puts directory
-      # Add your logic here for handling these changes
+        
+        puts config
+
+      end
+
+      # unless removed.empty?
+      #   /\/var\/harbr\/(?<container>.+)\/.*/.match(removed.first)
+      #   config = "/var/harbr/#{$1}/config/manifest.yml"
+        
+      #   puts $1 
+        
+
+      # end
+      
     end
     @@listener.start # not blocking
     sleep

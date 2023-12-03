@@ -12,3 +12,5 @@ gem "rspec", "~> 3.0"
 gem "standard", "~> 1.3"
 
 gem "terminal-table", "~> 3.0"
+
+gem "sucker_punch", "~> 3.1"
