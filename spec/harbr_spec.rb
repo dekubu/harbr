@@ -13,6 +13,9 @@ RSpec.describe Harbr::Port::Pool do
   end
   it 'should have 1000 ports' do
     pool = Harbr::Port::Pool.new
+    port = pool.get_port("vidtreon.harbr.zer2one.ee")        
+    p port
     expect(pool.ports.count).to eq(1001)
+    
   end
 end
