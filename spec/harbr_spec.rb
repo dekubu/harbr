@@ -7,11 +7,12 @@ end
 
 RSpec.describe Harbr::Port::Pool do
 
-  it 'should have 100 ports' do
-    
+  it 'should have 1000 ports' do
     pool = Harbr::Port::Pool.new
-
     expect(pool.ports.count).to eq(1001)
-
+  end
+  it 'should have 1000 ports' do
+    pool = Harbr::Port::Pool.new
+    expect(pool.ports.count).to eq(1001)
   end
 end
