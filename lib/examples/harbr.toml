@@ -1,0 +1,38 @@
+# Define HTTP routers
+[http.routers]
+
+# Define the router for the Traefik Dashboard and API
+[http.routers.traefik-dashboard]
+  rule = "Host(`traefik.harbr.zero2one.ee`)"
+  service = "api@internal"
+  entryPoints = ["http"]
+
+[http.routers.tallinn-router]
+  rule = "Host(`tallinn.laki.zero2one.ee`)"
+   service = "tallinn-service"
+
+[http.routers.vidtreon-router]
+  rule = "Host(`vidtreon.harbr.zero2one.ee`)"
+   service = "vidtreon-service"
+
+[http.routers.sild-router]
+  rule = "Host(`sild.harbr.zero2one.ee`)"
+   service = "sild-service"
+
+
+
+[http.services]
+[http.services.tallinn-service]
+  [http.services.tallinn-service.loadBalancer]
+    [[http.services.tallinn-service.loadBalancer.servers]]
+      url = "http://10.80.172.9:80"
+
+[http.services.vidtreon-service]
+  [http.services.vidtreon-service.loadBalancer]
+    [[http.services.vidtreon-service.loadBalancer.servers]]
+      url = "http://127.0.0.1:9292"
+
+[http.services.sild-service]
+  [http.services.sild-service.loadBalancer]
+    [[http.services.sild-service.loadBalancer.servers]]
+      url = "http://127.0.0.1:9393"

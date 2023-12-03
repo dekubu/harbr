@@ -121,16 +121,7 @@ class HarbrCLI < Thor
 
   desc "containers", "show all containers"
   def containers
-
     container_repo = Harbr::Container::Repository.new
-    container = Harbr::Container.new
-    container.name =  "vidtreon"
-    container.host_header = "vidtreon.harbr.zero2one.ee"
-    container.ip = "127.0.0.1"
-    container.port = "9393"
-
-    container_repo.create(container)
-
     display_containers_table(container_repo.all)
   end
 
