@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   # Dependencies can be added here. For example, if you use Net::SSH or similar gems:
   spec.add_dependency "listen", "~> 3.8"
   spec.add_dependency "thor", '~> 1.3'
+  spec.add_dependency "dddr", '~> 1.0'
 end
