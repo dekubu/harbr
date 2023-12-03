@@ -28,7 +28,11 @@ class HarbrCLI < Thor
       end
 
       table = ::Terminal::Table.new(headings: headers, rows: rows)
+      puts ""
+      puts "Harbr Containers"
+      puts ""
       puts table
+      puts ""
     end
 
 
