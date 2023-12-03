@@ -1,0 +1,137 @@
+Now displaying all the containers
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is ahead of 'origin/main' by 4 commits.
+#   (use "git push" to publish your local commits)
+#
+# Changes to be committed:
+#	new file:   .data/development/Harbr::Container.dir
+#	new file:   .data/development/Harbr::Container.pag
+#	modified:   Gemfile.lock
+#	modified:   exe/harbr
+#	modified:   harbr.gemspec
+#	modified:   lib/harbr.rb
+#
+# ------------------------ >8 ------------------------
+# Do not modify or remove the line above.
+# Everything below it will be ignored.
+diff --git a/.data/development/Harbr::Container.dir b/.data/development/Harbr::Container.dir
+new file mode 100644
+index 0000000..b57c670
+Binary files /dev/null and b/.data/development/Harbr::Container.dir differ
+diff --git a/.data/development/Harbr::Container.pag b/.data/development/Harbr::Container.pag
+new file mode 100644
+index 0000000..af1aefa
+Binary files /dev/null and b/.data/development/Harbr::Container.pag differ
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 22b5edd..0b76c1b 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -2,7 +2,7 @@ PATH
+   remote: .
+   specs:
+     harbr (0.0.3)
+-      dddr (~> 1.0.2)
++      dddr (~> 1.0.3)
+       listen (~> 3.8)
+       terminal-table (= 3.0.2)
+       thor (~> 1.3)
+@@ -11,7 +11,7 @@ GEM
+   remote: https://rubygems.org/
+   specs:
+     ast (2.4.2)
+-    dddr (1.0.2)
++    dddr (1.0.3)
+       sdbm (~> 1.0)
+     diff-lcs (1.5.0)
+     ffi (1.16.3)
+diff --git a/exe/harbr b/exe/harbr
+index c977461..60fa426 100755
+--- a/exe/harbr
++++ b/exe/harbr
+@@ -2,6 +2,8 @@
+ require 'thor'
+ require 'listen'
+ require 'dddr'
++require 'harbr'
++require 'terminal-table'
+ 
+ class HarbrCLI < Thor
+   DEFAULT_DIRECTORY = '/var/harbr'
+@@ -14,6 +16,22 @@ class HarbrCLI < Thor
+ 
+ 
+   no_commands do
++
++    def display_containers_table(containers)
++      return puts "No containers available." if containers.empty?
++
++      # Define headers based on Container attributes
++      headers = ['Name', 'Host Header', 'IP', 'Port']
++
++      rows = containers.map do |container|
++        [container.name, container.host_header, container.ip, container.port]
++      end
++
++      table = ::Terminal::Table.new(headings: headers, rows: rows)
++      puts table
++    end
++
++
+     def check_and_create_directory(path)
+       unless Dir.exist?(path)
+         puts "Creating directory: #{path}"
+@@ -96,6 +114,22 @@ class HarbrCLI < Thor
+       puts "Harbr is not running or already active."
+     end
+   end
++
++  desc "containers", "show all containers"
++  def containers
++
++    container_repo = Harbr::Container::Repository.new
++    container = Harbr::Container.new
++    container.name =  "vidtreon"
++    container.host_header = "vidtreon.harbr.zero2one.ee"
++    container.ip = "127.0.0.1"
++    container.port = "9393"
++
++    container_repo.create(container)
++
++    display_containers_table(container_repo.all)
++  end
++
+ end
+ 
+ HarbrCLI.start(ARGV)
+diff --git a/harbr.gemspec b/harbr.gemspec
+index b322435..89ade49 100644
+--- a/harbr.gemspec
++++ b/harbr.gemspec
+@@ -31,6 +31,6 @@ Gem::Specification.new do |spec|
+   # Dependencies can be added here. For example, if you use Net::SSH or similar gems:
+   spec.add_dependency "listen", "~> 3.8"
+   spec.add_dependency "thor", '~> 1.3'
+-  spec.add_dependency "dddr", '~> 1.0.2'
++  spec.add_dependency "dddr", '~> 1.0.3'
+   spec.add_dependency "terminal-table", "3.0.2"
+ end
+diff --git a/lib/harbr.rb b/lib/harbr.rb
+index a40ac82..0268f1c 100644
+--- a/lib/harbr.rb
++++ b/lib/harbr.rb
+@@ -4,10 +4,10 @@ require 'dddr'
+ 
+ module Harbr
+   class Error < StandardError; end
+-
+    class Container
+     include Dddr::Entity
+     attr_accessor :name, :host_header, :ip, :port  
+    end
+-  # Your code goes here...
++
++   # Your code goes here...
+ end
