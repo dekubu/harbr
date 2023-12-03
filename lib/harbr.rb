@@ -52,7 +52,9 @@ module Harbr
       end
 
       def return_port(port)
-
+        port.host_header = nil
+        @repository.update(port)
+        port.host_header.nil?
       end
     
       def ports

@@ -11,11 +11,15 @@ RSpec.describe Harbr::Port::Pool do
     pool = Harbr::Port::Pool.new
     expect(pool.ports.count).to eq(1001)
   end
-  it 'should have 1000 ports' do
+  it 'should get port' do
     pool = Harbr::Port::Pool.new
     port = pool.get_port("vidtreon.harbr.zer2one.ee")        
-    p port
-    expect(pool.ports.count).to eq(1001)
-    
+    expect(port.host_header).to eq("vidtreon.harbr.zer2one.ee")
+  end
+  it 'should return port' do
+    pool = Harbr::Port::Pool.new
+    port = pool.get_port("sild.harbr.zer2one.ee")        
+    expect(port.host_header).to eq("sild.harbr.zer2one.ee")
+    expect(pool.return_port(port)).to be_truthy
   end
 end
