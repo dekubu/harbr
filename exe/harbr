@@ -18,6 +18,11 @@ class HarbrCLI < Thor
 
   no_commands do
 
+    def extract_container_name(path)
+      match = path.match(/\/var\/harbr\/(?<container_name>.*)\/versions\/\d*\/config\/manifest.yml/)
+      match ? match[:container_name] : nil
+    end
+
     def display_containers_table(containers)
       return puts "No containers available." if containers.empty?
 
@@ -72,24 +77,26 @@ class HarbrCLI < Thor
 
     puts "Setup completed successfully."
   end
+
   desc "start [DIRECTORY]", "Start listening to a directory for changes"
   def start(directory = DEFAULT_DIRECTORY)
     return if @@listener
 
     puts "Starting Harbr, listening to #{directory}"
-    
-    @@listener = Listen.to(directory) do |modified, added, removed|
-      unless added.empty?
-        added.each do |path|
-          /\/var\/harbr\/(?<container>.*)\/versions\/(?<version>\d*)\/config\/manifest.yml/.match(path)
-          if $1
-            Harbr::Container::Job.perform_async($1)
-            break
-          end
 
+    @@listener = Listen.to(directory) do |modified, added, removed|
+      job_created = false
+
+      added.each do |path|
+        next if job_created
+        if path.match?(/\/var\/harbr\/.*\/versions\/\d*\/config\/manifest.yml/)
+          container_name = extract_container_name(path)
+          if container_name
+            Harbr::Container::Job.perform_async(container_name)
+            job_created = true
+          end
         end
       end
-
     end
     @@listener.start # not blocking
     sleep
