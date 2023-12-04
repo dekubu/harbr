@@ -80,22 +80,16 @@ class HarbrCLI < Thor
     
     @@listener = Listen.to(directory) do |modified, added, removed|
       unless added.empty?
-        next if added.first.include? "vendor"
-        next if added.first.include? ".git"
-        /\/var\/harbr\/(?<container>.+)\/.*/.match(added.first)  
-        config = "/var/harbr/#{$1}/config/manifest.yml"
-        Harbr::Container::Job.perform_async(config)
+        added.each do |path|
+          /\/var\/harbr\/(?<container>.*)\/versions\/(?<version>\d*)\/config\/manifest.yml/.match(path)
+          if $1
+            Harbr::Container::Job.perform_async($1)
+            break
+          end
+
+        end
       end
 
-      # unless removed.empty?
-      #   /\/var\/harbr\/(?<container>.+)\/.*/.match(removed.first)
-      #   config = "/var/harbr/#{$1}/config/manifest.yml"
-        
-      #   puts $1 
-        
-
-      # end
-      
     end
     @@listener.start # not blocking
     sleep
