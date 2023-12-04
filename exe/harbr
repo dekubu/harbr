@@ -51,6 +51,20 @@ class HarbrCLI < Thor
       puts "Installing #{package} using apt..."
       system("sudo apt install #{package}") or raise "Failed to install #{package}"
     end
+
+    def scan_for_containers
+      Dir.glob("/var/harbr/*").each_with_object({}) do |container_path, hash|
+        next unless File.directory?(container_path)
+        container_name = File.basename(container_path)
+        versions = Dir.glob("#{container_path}/versions/*").select { |path| File.directory?(path) }
+        versions.each { |version_path| hash["#{container_name}/versions/#{File.basename(version_path)}"] = true }
+      end
+    end
+
+    def place(container, version)
+      puts "Placing container: '#{container}', Version: '#{version}'"
+    end
+
   end
 
   desc "setup", "Set up Harbr environment"
@@ -71,6 +85,26 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
     display_containers_table(container_repo.all)
   end
+
+  desc "run", "Monitor /var/harbr for new container versions"
+  def run
+    puts "Monitoring /var/harbr for new container versions..."
+    last_known_state = {}
+
+    loop do
+      current_state = scan_for_containers
+      new_versions = current_state.keys - last_known_state.keys
+
+      new_versions.each do |container_version|
+        container, version = container_version.split("/versions/")
+        place(container, version)
+      end
+
+      last_known_state = current_state
+      sleep 10 # Poll every 10 seconds
+    end
+  end
+
 end
 
 HarbrCLI.start(ARGV)
