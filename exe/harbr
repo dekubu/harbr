@@ -17,7 +17,7 @@ class HarbrCLI < Thor
   no_commands do
 
     def load_manifest(container, version)
-      manifest_path = "/var/harbr/#{container}/#{version}/config/manifest.yml"
+      manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
       if File.exist?(manifest_path)
         manifest_data = YAML.load_file(manifest_path)
         OpenStruct.new(manifest_data)
