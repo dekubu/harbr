@@ -11,9 +11,9 @@ module Harbr
     class Job
       include SuckerPunch::Job
 
-      def perform(config)
+      def perform(manifest)
         puts "Harbr Job!"
-        puts config
+        puts manifest
       end
     end
 

@@ -90,7 +90,7 @@ class HarbrCLI < Thor
     end
 
     def run_tasks(container, version)
-      manifest = load_manifest(container,var)
+      manifest = load_manifest(container,version)
       Harbr::Container::Job.perform_async(manifest)
       puts "Running tasks for container: '#{container}', Version: '#{version}'"
     end
