@@ -13,6 +13,12 @@ module Harbr
 
       def perform(manifest)
         puts "Harbr Job!"
+
+        pool = Harbr::Port::Pool.new
+        port = pool.get_port(manifest.host)
+        p port
+
+
         puts manifest
       end
     end
