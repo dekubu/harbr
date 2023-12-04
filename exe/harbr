@@ -86,8 +86,8 @@ class HarbrCLI < Thor
     display_containers_table(container_repo.all)
   end
 
-  desc "run", "Monitor /var/harbr for new container versions"
-  def run
+  desc "monitor", "Monitor /var/harbr for new container versions"
+  def monitor
     puts "Monitoring /var/harbr for new container versions..."
     last_known_state = {}
 
