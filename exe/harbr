@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require "thor"
-require "listen"
 require "dddr"
 require "harbr"
 require "sucker_punch"
@@ -9,18 +8,11 @@ require "terminal-table"
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = "/var/harbr"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
-  @@listener = nil
-
   Dddr.configure do |config|
     config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
   end
 
   no_commands do
-    def extract_container_name(path)
-      match = path.match(/\/var\/harbr\/(?<container_name>.*)\/versions\/\d*\/config\/manifest.yml/)
-      match ? match[:container_name] : nil
-    end
-
     def display_containers_table(containers)
       return puts "No containers available." if containers.empty?
 
@@ -72,61 +64,6 @@ class HarbrCLI < Thor
     install_with_apt("runit") unless command_exists?("runit")
 
     puts "Setup completed successfully."
-  end
-
-  desc "start [DIRECTORY]", "Start listening to a directory for changes"
-  def start(directory = DEFAULT_DIRECTORY)
-    return if @@listener
-
-    puts "Starting Harbr, listening to #{directory}"
-
-    @@listener = Listen.to(directory) do |modified, added, removed|
-      job_created = false
-
-      added.each do |path|
-        next if job_created
-        if path.match?(/\/var\/harbr\/.*\/versions\/\d*\/config\/manifest.yml/)
-          container_name = extract_container_name(path)
-          if container_name
-            Harbr::Container::Job.perform_async(container_name)
-            job_created = true
-          end
-        end
-      end
-    end
-    @@listener.start # not blocking
-    sleep
-  end
-
-  desc "stop", "Stop Harbr"
-  def stop
-    if @@listener
-      @@listener.stop
-      @@listener = nil
-      puts "Harbr has been stopped."
-    else
-      puts "Harbr is not running."
-    end
-  end
-
-  desc "pause", "Pause Harbr"
-  def pause
-    if @@listener
-      @@listener.pause
-      puts "Harbr has been paused."
-    else
-      puts "Harbr is not running or already paused."
-    end
-  end
-
-  desc "resume", "Resume Harbr"
-  def resume
-    if @@listener
-      @@listener.start
-      puts "Harbr has been resumed."
-    else
-      puts "Harbr is not running or already active."
-    end
   end
 
   desc "containers", "show all containers"
