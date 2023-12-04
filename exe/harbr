@@ -61,8 +61,23 @@ class HarbrCLI < Thor
       end
     end
 
+    PLACED_FILE = '/var/harbr/.placed'
+
     def place(container, version)
-      puts "Placing container: '#{container}', Version: '#{version}'"
+      placed_containers = File.exist?(PLACED_FILE) ? File.read(PLACED_FILE).split("\n") : []
+
+      if placed_containers.include?("#{container}/#{version}")
+        puts "Container '#{container}', Version '#{version}' is already placed."
+      else
+        puts "Placing container: '#{container}', Version: '#{version}'"
+        run_tasks(container, version)
+        File.open(PLACED_FILE, 'a') { |file| file.puts("#{container}/#{version}") }
+      end
+    end
+
+    def run_tasks(container, version)
+      # Your logic for processing the container and version
+      puts "Running tasks for container: '#{container}', Version: '#{version}'"
     end
 
   end
