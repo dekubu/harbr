@@ -4,6 +4,8 @@ require "dddr"
 require "harbr"
 require "sucker_punch"
 require "terminal-table"
+require 'yaml'
+require 'ostruct'
 
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = "/var/harbr"
@@ -13,6 +15,18 @@ class HarbrCLI < Thor
   end
 
   no_commands do
+
+    def load_manifest(container, version)
+      manifest_path = "/var/harbr/#{container}/#{version}/config/manifest.yml"
+      if File.exist?(manifest_path)
+        manifest_data = YAML.load_file(manifest_path)
+        OpenStruct.new(manifest_data)
+      else
+        puts "Manifest file not found for container '#{container}', version '#{version}'"
+        nil
+      end
+    end
+
     def display_containers_table(containers)
       return puts "No containers available." if containers.empty?
 
