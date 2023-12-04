@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
-require 'thor'
-require 'listen'
-require 'dddr'
-require 'harbr'
-require 'sucker_punch'
-require 'terminal-table'
+require "thor"
+require "listen"
+require "dddr"
+require "harbr"
+require "sucker_punch"
+require "terminal-table"
 
 class HarbrCLI < Thor
-  DEFAULT_DIRECTORY = '/var/harbr'
+  DEFAULT_DIRECTORY = "/var/harbr"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
   @@listener = nil
 
@@ -15,9 +15,7 @@ class HarbrCLI < Thor
     config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
   end
 
-
   no_commands do
-
     def extract_container_name(path)
       match = path.match(/\/var\/harbr\/(?<container_name>.*)\/versions\/\d*\/config\/manifest.yml/)
       match ? match[:container_name] : nil
@@ -27,7 +25,7 @@ class HarbrCLI < Thor
       return puts "No containers available." if containers.empty?
 
       # Define headers based on Container attributes
-      headers = ['Name', 'Host Header', 'IP', 'Port']
+      headers = ["Name", "Host Header", "IP", "Port"]
 
       rows = containers.map do |container|
         [container.name, container.host_header, container.ip, container.port]
@@ -40,7 +38,6 @@ class HarbrCLI < Thor
       puts table
       puts ""
     end
-
 
     def check_and_create_directory(path)
       unless Dir.exist?(path)
@@ -62,18 +59,17 @@ class HarbrCLI < Thor
       puts "Installing #{package} using apt..."
       system("sudo apt install #{package}") or raise "Failed to install #{package}"
     end
-
   end
 
   desc "setup", "Set up Harbr environment"
   def setup
     # Check and create /var/harbr directory
-    check_and_create_directory('/var/harbr')
+    check_and_create_directory("/var/harbr")
 
     # Check for Ruby, Traefik, and runit, and install if necessary
-    install_with_snap('ruby') unless command_exists?('ruby')
-    install_with_snap('traefik') unless command_exists?('traefik')
-    install_with_apt('runit') unless command_exists?('runit')
+    install_with_snap("ruby") unless command_exists?("ruby")
+    install_with_snap("traefik") unless command_exists?("traefik")
+    install_with_apt("runit") unless command_exists?("runit")
 
     puts "Setup completed successfully."
   end
@@ -138,8 +134,6 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
     display_containers_table(container_repo.all)
   end
-
 end
 
 HarbrCLI.start(ARGV)
-
