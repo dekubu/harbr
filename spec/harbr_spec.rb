@@ -20,3 +20,20 @@ RSpec.describe Harbr::Port::Pool do
     expect(pool.return_port(port)).to be_truthy
   end
 end
+
+
+
+Manifest = Struct.new(:host,:version)
+RSpec.describe Harbr::Container::Job do
+
+  it 'should assign port' do
+    
+    manifest = Manifest.new("test.harbr.zer2one.ee",1)
+    Harbr::Container::Job.new.perform(manifest)
+
+
+  end
+
+end
+
+
