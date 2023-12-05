@@ -4,8 +4,8 @@ require "dddr"
 require "harbr"
 require "sucker_punch"
 require "terminal-table"
-require 'yaml'
-require 'ostruct'
+require "yaml"
+require "ostruct"
 
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = "/var/harbr"
@@ -15,7 +15,6 @@ class HarbrCLI < Thor
   end
 
   no_commands do
-
     def load_manifest(container, version)
       manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
       if File.exist?(manifest_path)
@@ -75,7 +74,7 @@ class HarbrCLI < Thor
       end
     end
 
-    PLACED_FILE = '/var/harbr/.placed'
+    PLACED_FILE = "/var/harbr/.placed"
 
     def place(container, version)
       placed_containers = File.exist?(PLACED_FILE) ? File.read(PLACED_FILE).split("\n") : []
@@ -85,16 +84,15 @@ class HarbrCLI < Thor
       else
         puts "Placing container: '#{container}', Version: '#{version}'"
         run_tasks(container, version)
-        File.open(PLACED_FILE, 'a') { |file| file.puts("#{container}/#{version}") }
+        File.open(PLACED_FILE, "a") { |file| file.puts("#{container}/#{version}") }
       end
     end
 
     def run_tasks(container, version)
-      manifest = load_manifest(container,version)
+      manifest = load_manifest(container, version)
       Harbr::Container::Job.perform_async(manifest)
       puts "Running tasks for container: '#{container}', Version: '#{version}'"
     end
-
   end
 
   desc "setup", "Set up Harbr environment"
@@ -134,7 +132,6 @@ class HarbrCLI < Thor
       sleep 10 # Poll every 10 seconds
     end
   end
-
 end
 
 HarbrCLI.start(ARGV)

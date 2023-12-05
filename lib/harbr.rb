@@ -18,7 +18,6 @@ module Harbr
         port = pool.get_port(manifest.host)
         p port
 
-
         puts manifest
       end
     end
