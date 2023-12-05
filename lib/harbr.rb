@@ -5,6 +5,16 @@ require "dddr"
 require "sucker_punch"
 
 module Harbr
+  
+  DEFAULT_DIRECTORY = "/var/harbr"
+  DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
+
+  Dddr.configure do |config|
+    config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
+  end
+
+
+
   class Error < StandardError; end
 
   class Container
@@ -13,6 +23,12 @@ module Harbr
 
       def perform(manifest)
         puts "Harbr Job!"
+
+        Dddr.configure do |config|
+          config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
+        end
+
+
 
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
