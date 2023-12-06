@@ -19,29 +19,17 @@ module Harbr
   class Error < StandardError; end
 
   class Container
+
+    queries do
+      def find_by_header(host_header)
+        all.find { |container| container.host_header.downcase == host_header.downcase }
+      end
+    end
     class Job
       include SuckerPunch::Job
 
       def perform(manifest)
-        
-        puts "Starting container: #{manifest.name}"
-
-        Dddr.configure do |config|
-          config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
-        end
-
-        pool = Harbr::Port::Pool.new
-        port = pool.get_port(manifest.host)
-      
-        create_a_service(manifest.name, port.number)
-        
-        
-        sleep 5
-        system("sv restart #{manifest.name}")
-        sleep 5
-        system("sv status #{manifest.name}")
-        puts "Started container: #{manifest.name}"
-        
+        run_container(manifest)
       end
 
 
@@ -96,6 +84,41 @@ module Harbr
         create_log_script(container_name)
         system("ln -s /etc/sv/harbr/#{container_name} /etc/service/#{container_name}") unless File.exist?("/etc/service/#{container_name}")
       end
+
+      def run_container(manifest)
+
+        puts "Starting container: #{manifest.name}"
+
+        Dddr.configure do |config|
+          config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
+        end
+
+        pool = Harbr::Port::Pool.new
+        port = pool.get_port(manifest.host)
+      
+        create_a_service(manifest.name, port.number)
+        
+        
+        sleep 5
+        system("sv restart #{manifest.name}")
+        sleep 5
+        system("sv status #{manifest.name}")
+        puts "Started container: #{manifest.name}"
+
+
+        container = Container.new
+        containers = Container::Repository.new 
+
+        container.name = manifest.name
+        container.host_header = manifest.host
+        container.ip = manifest.ip
+        container.port = port.number        
+        containers.add(container) unless containers.find_by_header(manifest.host)
+
+        puts "Started container: #{manifest.name}"
+
+      end
+
 
 
     end
