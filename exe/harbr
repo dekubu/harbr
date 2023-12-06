@@ -5,6 +5,8 @@ require "harbr"
 require "sucker_punch"
 require "terminal-table"
 require "yaml"
+require 'toml-rb'
+require "fileutils"
 require "ostruct"
 
 class HarbrCLI < Thor
@@ -15,7 +17,6 @@ class HarbrCLI < Thor
   end
 
   no_commands do
-
     def load_manifest(container, version)
       manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
       if File.exist?(manifest_path)

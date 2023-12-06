@@ -3,7 +3,8 @@
 require_relative "harbr/version"
 require "dddr"
 require "sucker_punch"
-require "fileutils"
+
+require 'toml-rb'
 
 module Harbr
   
@@ -26,6 +27,35 @@ module Harbr
         run_container(manifest)
       end
 
+
+    def create_traefik_config(containers)
+      config = {
+        "http" => {
+          "routers" => {
+            "traefik-dashboard" => {
+              "rule" => "Host(`traefik.harbr.zero2one.ee`)",
+              "service" => "api@internal"
+            }
+          },
+          "services" => {}
+        }
+      }
+
+      containers.each do |container|
+        config["http"]["routers"]["#{container.name}-router"] = {
+          "rule" => "Host(`#{container.host_header}`)",
+          "service" => "#{container.name}-service"
+        }
+        config["http"]["services"]["#{container.name}-service"] = {
+          "loadBalancer" => {
+            "servers" => [{ "url" => "http://#{container.ip}:#{container.port}" }]
+          }
+        }
+      end
+
+      File.write('/etc/traefik/harbr.toml', TomlRB.dump(config))
+      puts "Traefik configuration written to /etc/traefik/harbr.toml"
+    end
 
       def create_run_script(container_name, port)
         service_dir = "/etc/sv/harbr/#{container_name}"
@@ -109,7 +139,8 @@ module Harbr
         container.port = port.number        
         containers.add(container) unless containers.find_by_header(manifest.host)
 
-        puts "Started container: #{manifest.name}"
+        create_traefik_config(containers.all)
+        
 
       end
 

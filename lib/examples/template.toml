@@ -1,0 +1,15 @@
+# Define HTTP routers
+[http.routers]
+  [http.routers.traefik-dashboard]
+    rule = "Host(`traefik.harbr.zero2one.ee`)"
+    service = "api@internal"
+
+  [http.routers.sild-router]
+    rule = "Host(`sild.harbr.zero2one.ee`)"
+    service = "sild-service"
+
+[http.services]
+[http.services.tallinn-service]
+  [http.services.tallinn-service.loadBalancer]
+    [[http.services.tallinn-service.loadBalancer.servers]]
+      url = "http://127.0.0.1:80"
