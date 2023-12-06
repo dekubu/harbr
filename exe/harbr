@@ -34,7 +34,7 @@ class HarbrCLI < Thor
       headers = ["Name", "Host Header", "IP", "Port"]
 
       rows = containers.map do |container|
-        [container.name, container.host_header, container.ip, container.port]
+        [container.name, container.host_header, container.ip.nil? ? "127.0.0.1" : container.ip , container.port]
       end
 
       table = ::Terminal::Table.new(headings: headers, rows: rows)

@@ -105,7 +105,7 @@ module Harbr
 
         container.name = manifest.name
         container.host_header = manifest.host
-        container.ip = manifest.ip
+        container.ip = manifest.ip.nil? 
         container.port = port.number        
         containers.add(container) unless containers.find_by_header(manifest.host)
 
@@ -125,7 +125,7 @@ module Harbr
         all.find { |container| container.host_header.downcase == host_header.downcase }
       end
     end
-    
+
   end
 
   class Port
