@@ -29,6 +29,9 @@ module Harbr
         end
 
 
+        p Dddr.configuration
+
+
 
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
