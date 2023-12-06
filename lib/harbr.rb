@@ -33,13 +33,13 @@ module Harbr
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
       
-        create_run_script(manifest.name, port.number)
-        create_log_script(manifest.name)
+        create_a_service(container_name, port)
 
         system("sv restart #{manifest.name}")
         system("sv status #{manifest.name}")
       
       end
+
 
       def create_run_script(container_name, port)
         service_dir = "/etc/sv/harbr/#{container_name}"
@@ -82,6 +82,13 @@ module Harbr
         FileUtils.chmod("+x", "#{dir_path}/run")
         puts "Log script created and made executable for container: #{container_name}"
       end
+      
+      def create_a_service(container_name, port)
+        create_run_script(container_name, port)
+        create_log_script(container_name)
+        system("ln -s /etc/sv/harbr/#{container_name} /etc/service/#{container_name}") unless File.exist?("/etc/service/#{container_name}")
+      end
+
 
     end
 
