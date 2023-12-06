@@ -3,6 +3,7 @@
 require_relative "harbr/version"
 require "dddr"
 require "sucker_punch"
+require "fileutils"
 
 module Harbr
   
