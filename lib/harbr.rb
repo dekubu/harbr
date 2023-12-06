@@ -34,10 +34,14 @@ module Harbr
         port = pool.get_port(manifest.host)
       
         create_a_service(manifest.name, port.number)
-
+        
+        
+        sleep 5
         system("sv restart #{manifest.name}")
+        sleep 5
         system("sv status #{manifest.name}")
-      
+        puts "Started container: #{manifest.name}"
+        
       end
 
 
