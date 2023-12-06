@@ -33,7 +33,7 @@ module Harbr
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
       
-        create_a_service(container_name, port)
+        create_a_service(manifest.name, port.number)
 
         system("sv restart #{manifest.name}")
         system("sv status #{manifest.name}")
