@@ -75,7 +75,7 @@ module Harbr
           exec svlogd -tt #{log_dir}/
         SCRIPT
   
-        dir_path = "/etc/sv/harbr/#{container_name}"
+        dir_path = "/etc/sv/harbr/#{container_name}/log"
         FileUtils.mkdir_p(dir_path)
         
         File.write("#{dir_path}/run", script_template)
