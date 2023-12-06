@@ -22,7 +22,8 @@ module Harbr
       include SuckerPunch::Job
 
       def perform(manifest)
-        puts "Harbr Job!"
+        
+        puts "Starting container: #{manifest.name}"
 
         Dddr.configure do |config|
           config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
@@ -30,10 +31,57 @@ module Harbr
 
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
-        p port
+      
+        create_run_script(manifest.name, port.number)
+        create_log_script(manifest.name)
 
-        puts manifest
+        system("sv restart #{manifest.name}")
+        system("sv status #{manifest.name}")
+      
       end
+
+      def create_run_script(container_name, port)
+        service_dir = "/etc/sv/harbr/#{container_name}"
+        if File.directory?(log_dir)
+          puts "Directory already exists: #{log_dir}"
+          return
+        end
+  
+        script_template = <<~SCRIPT
+          #!/bin/sh
+          exec 2>&1
+          cd /var/harbr/#{container_name}/current
+          exec bundle exec puma -p #{port}
+        SCRIPT
+  
+        service_dir = "/etc/sv/harbr/#{container_name}"
+        FileUtils.mkdir_p(service_dir)
+        
+        File.write("#{service_dir}/run", script_template)
+        FileUtils.chmod("+x", "#{service_dir}/run")
+        puts "Run script created and made executable for container: #{container_name}"
+      end
+  
+      def create_log_script(container_name)
+        log_dir = "/var/log/harbr/#{container_name}"
+        if File.directory?(log_dir)
+          puts "Directory already exists: #{log_dir}"
+          return
+        end
+  
+        script_template = <<~SCRIPT
+          #!/bin/sh
+          exec svlogd -tt #{log_dir}/
+        SCRIPT
+  
+        dir_path = "/etc/sv/harbr/#{container_name}"
+        FileUtils.mkdir_p(dir_path)
+        
+        File.write("#{dir_path}/run", script_template)
+        FileUtils.chmod("+x", "#{dir_path}/run")
+        puts "Log script created and made executable for container: #{container_name}"
+      end
+
     end
 
     include Dddr::Entity
