@@ -42,6 +42,9 @@ module Harbr
       }
 
       containers.each do |container|
+
+        container.ip = "127.0.0.1"
+        
         config["http"]["routers"]["#{container.name}-router"] = {
           "rule" => "Host(`#{container.host_header}`)",
           "service" => "#{container.name}-service"
