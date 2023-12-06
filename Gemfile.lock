@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     harbr (0.0.14)
-      dddr (~> 1.0.3)
+      dddr (~> 1.0.4)
       listen (~> 3.8)
       sucker_punch (~> 3.1.0)
       terminal-table (= 3.0.2)

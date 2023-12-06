@@ -28,11 +28,6 @@ module Harbr
           config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
         end
 
-
-        p Dddr.configuration
-
-
-
         pool = Harbr::Port::Pool.new
         port = pool.get_port(manifest.host)
         p port
