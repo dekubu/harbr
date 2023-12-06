@@ -42,8 +42,8 @@ module Harbr
 
       def create_run_script(container_name, port)
         service_dir = "/etc/sv/harbr/#{container_name}"
-        if File.directory?(log_dir)
-          puts "Directory already exists: #{log_dir}"
+        if File.directory?(service_dir)
+          puts "Directory already exists: #{service_dir}"
           return
         end
   
