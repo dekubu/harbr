@@ -56,7 +56,7 @@ module Harbr
           #!/bin/sh
           exec 2>&1
           cd /var/harbr/#{container_name}/current
-          exec bundle exec puma -p #{port}
+          exec bundle install && bundle exec puma -p #{port}
         SCRIPT
   
         service_dir = "/etc/sv/harbr/#{container_name}"
@@ -68,12 +68,16 @@ module Harbr
       end
   
       def create_log_script(container_name)
+        
         log_dir = "/var/log/harbr/#{container_name}"
+        
         if File.directory?(log_dir)
           puts "Directory already exists: #{log_dir}"
           return
         end
-  
+        
+        FileUtils.mkdir_p(log_dir)
+        
         script_template = <<~SCRIPT
           #!/bin/sh
           exec svlogd -tt #{log_dir}/
