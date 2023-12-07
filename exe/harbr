@@ -1,13 +1,5 @@
 #!/usr/bin/env ruby
-require "thor"
-require "dddr"
-require "harbr"
-require "sucker_punch"
-require "terminal-table"
-require "yaml"
-require "toml-rb"
-require "fileutils"
-require "ostruct"
+require_relative "../lib/harbr"
 
 class HarbrCLI < Thor
   DEFAULT_DIRECTORY = "/var/harbr"

@@ -1,5 +1,12 @@
-require "sucker_punch"
+require "thor"
+require "dddr"
+require "harbr"
+require "terminal-table"
+require "yaml"
 require "toml-rb"
+require "fileutils"
+require "ostruct"
+require "sucker_punch"
 
 require_relative "harbr/version"
 require_relative "harbr/container"
