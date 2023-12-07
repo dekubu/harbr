@@ -21,19 +21,10 @@ RSpec.describe Harbr::Port::Pool do
   end
 end
 
-
-
-Manifest = Struct.new(:host,:version)
+Manifest = Struct.new(:host, :version)
 RSpec.describe Harbr::Container::Job do
-
-  it 'should assign port' do
-    
-    manifest = Manifest.new("test.harbr.zer2one.ee",1)
+  it "should assign port" do
+    manifest = Manifest.new("test.harbr.zer2one.ee", 1)
     Harbr::Container::Job.new.perform(manifest)
-
-
   end
-
 end
-
-

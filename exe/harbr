@@ -5,7 +5,7 @@ require "harbr"
 require "sucker_punch"
 require "terminal-table"
 require "yaml"
-require 'toml-rb'
+require "toml-rb"
 require "fileutils"
 require "ostruct"
 
@@ -35,7 +35,7 @@ class HarbrCLI < Thor
       headers = ["Name", "Host Header", "IP", "Port"]
 
       rows = containers.map do |container|
-        [container.name, container.host_header, container.ip.nil? ? "127.0.0.1" : container.ip , container.port]
+        [container.name, container.host_header, container.ip.nil? ? "127.0.0.1" : container.ip, container.port]
       end
 
       table = ::Terminal::Table.new(headings: headers, rows: rows)
