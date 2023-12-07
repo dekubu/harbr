@@ -1,6 +1,3 @@
-# frozen_string_literal: true
-
-require "dddr"
 require "sucker_punch"
 require "toml-rb"
 
@@ -10,7 +7,8 @@ require_relative "harbr/job"
 require_relative "harbr/port"
 require_relative "harbr/pool"
 
-module Harbr # rubocop:disable Style/Documentation
+# Harbr module for managing containers, jobs, ports, and pools
+module Harbr
   DEFAULT_DIRECTORY = "/var/harbr"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
 
@@ -19,6 +17,4 @@ module Harbr # rubocop:disable Style/Documentation
   end
 
   class Error < StandardError; end
-
-  # Your code goes here...
 end
