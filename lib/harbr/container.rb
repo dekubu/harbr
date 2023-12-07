@@ -7,5 +7,10 @@ module Harbr
         all.find { |container| container.host_header.downcase == host_header.downcase }
       end
     end
+    
+    def number
+      port
+    end
+
   end
 end
