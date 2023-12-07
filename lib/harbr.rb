@@ -23,4 +23,3 @@ end
 Dddr.configure do |config|
   config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
 end
-
