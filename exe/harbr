@@ -2,12 +2,7 @@
 require_relative "../lib/harbr"
 
 class HarbrCLI < Thor
-  DEFAULT_DIRECTORY = "/var/harbr"
-  DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
-  Dddr.configure do |config|
-    config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
-  end
-
+  
   no_commands do
     def load_manifest(container, version)
       manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"

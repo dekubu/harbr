@@ -1,6 +1,5 @@
 require "thor"
 require "dddr"
-require "harbr"
 require "terminal-table"
 require "yaml"
 require "toml-rb"
@@ -18,10 +17,10 @@ require_relative "harbr/pool"
 module Harbr
   DEFAULT_DIRECTORY = "/var/harbr"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
-
-  Dddr.configure do |config|
-    config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
-  end
-
   class Error < StandardError; end
 end
+
+Dddr.configure do |config|
+  config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
+end
+
