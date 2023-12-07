@@ -43,7 +43,7 @@ module Harbr
         script_template = <<~SCRIPT
           #!/bin/sh
           exec 2>&1
-          exec cd /var/harbr/#{container_name}/current
+          cd /var/harbr/#{container_name}/current
           exec bundle exec puma -p #{port}
         SCRIPT
 
@@ -111,10 +111,6 @@ module Harbr
       end
 
       def perform(manifest)
-        `sv stop #{manifest.name}`
-        `rm -rf /etc/sv/harbr/#{manifest.name}/`
-        `rm -rf /etc/service/#{manifest.name}`
-        `rm -rf /var/log/harbr/#{manifest.name}/`
         run_container(manifest)
       end
     end
