@@ -85,24 +85,7 @@ module Harbr
 
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
-
-      Dddr.configure do |config|
-        config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
-      end
-
-      pool = Harbr::Pool.new
-      port = pool.get_port(manifest.host)
-
-      create_a_service(manifest.name, port.number)
-
-      container = Container.new
-      containers = Container::Repository.new
-
-      container.name = manifest.name
-      container.host_header = manifest.host
-      container.ip = manifest.ip.nil?
-      container.port = port.number
-      containers.add(container) unless containers.find_by_header(manifest.host)
+      create_a_service(manifest.name, manifest.port)
       system("cd /var/harbr/#{manifest.name}/current && bundle install")
       system("sv restart #{manifest.name}")
       puts "Started container: #{manifest.name}"
