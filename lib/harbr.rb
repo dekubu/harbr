@@ -5,10 +5,11 @@ require "sucker_punch"
 require "toml-rb"
 
 require_relative "harbr/version"
+require_relative "harbr/container"
 require_relative "harbr/job"
 require_relative "harbr/port"
 require_relative "harbr/pool"
-require_relative "harbr/container"
+
 module Harbr # rubocop:disable Style/Documentation
   DEFAULT_DIRECTORY = "/var/harbr"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
