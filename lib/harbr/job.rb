@@ -43,8 +43,8 @@ module Harbr
         script_template = <<~SCRIPT
           #!/bin/sh
           exec 2>&1
-          cd /var/harbr/#{container_name}/current
-          exec bundle install && bundle exec puma -p #{port}
+          exec cd /var/harbr/#{container_name}/current
+          exec bundle exec puma -p #{port}
         SCRIPT
 
         service_dir = "/etc/sv/harbr/#{container_name}"
