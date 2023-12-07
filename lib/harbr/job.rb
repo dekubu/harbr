@@ -96,12 +96,6 @@ module Harbr
 
         create_a_service(manifest.name, port.number)
 
-        sleep 5
-        system("sv restart #{manifest.name}")
-        sleep 5
-        system("sv status #{manifest.name}")
-        puts "Started container: #{manifest.name}"
-
         container = Container.new
         containers = Container::Repository.new
 
@@ -110,7 +104,10 @@ module Harbr
         container.ip = manifest.ip.nil?
         container.port = port.number
         containers.add(container) unless containers.find_by_header(manifest.host)
-
+        
+        system("cd /var/harbr/#{manifest.name}/current && bundle install")
+        system("sv restart #{manifest.name}")
+        puts "Started container: #{manifest.name}"
         create_traefik_config(containers.all)
       end
 
