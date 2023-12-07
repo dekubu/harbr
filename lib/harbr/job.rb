@@ -98,7 +98,7 @@ module Harbr
       container.name = manifest.name
       container.host_header = manifest.host
       container.ip = "127.0.0.10"
-      container.port = manufest.port
+      container.port = manifest.port
       
 
       containers.add(container) unless containers.find_by_header(manifest.host)
