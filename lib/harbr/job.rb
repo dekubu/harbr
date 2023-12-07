@@ -103,8 +103,7 @@ module Harbr
         container.host_header = manifest.host
         container.ip = manifest.ip.nil?
         container.port = port.number
-        containers.add(container) unless containers.find_by_header(manifest.host)
-        
+        containers.add(container) unless containers.find_by_header(manifest.host)        
         system("cd /var/harbr/#{manifest.name}/current && bundle install")
         system("sv restart #{manifest.name}")
         puts "Started container: #{manifest.name}"
@@ -112,6 +111,10 @@ module Harbr
       end
 
       def perform(manifest)
+        `sv stop #{manifest.name}`
+        `rm -rf /etc/sv/harbr/#{manifest.name}/`
+        `rm -rf /etc/service/#{manifest.name}`
+        `rm -rf /var/log/harbr/#{manifest.name}/`
         run_container(manifest)
       end
     end
