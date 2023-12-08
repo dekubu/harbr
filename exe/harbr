@@ -135,8 +135,11 @@ class HarbrCLI < Thor
 
   desc "logs CONTAINER", "Show logs for a given container"
   def logs(container)
+    
+    container_repo = Harbr::Container::Repository.new
+    container = container_repo.find_by_name(container)
     if container == "container"
-      exec "tail -f /var/logs/harbr/container/current"
+      exec "tail -f /var/log/harbr/#{container}/current" 
     else
       puts "Container not recognized"
     end
