@@ -74,6 +74,60 @@ class HarbrCLI < Thor
       puts "done waiting"
       Harbr::Job.perform_async(container, version)
     end
+
+    def create_traefik_config(containers)
+      config = {
+        "http" => {
+          "routers" => {
+            "traefik-dashboard" => {
+              "rule" => "Host(`traefik.harbr.zero2one.ee`)",
+              "service" => "api@internal"
+            }
+          },
+          "services" => {}
+        }
+      }
+
+      containers.each do |container|
+        container.ip = "127.0.0.1"
+
+        config["http"]["routers"]["#{container.name}-router"] = {
+          "rule" => "Host(`#{container.host_header}`)",
+          "service" => "#{container.name}-service"
+        }
+        config["http"]["services"]["#{container.name}-service"] = {
+          "loadBalancer" => {
+            "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
+          }
+        }
+      end
+
+      File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
+      puts "Traefik configuration written to /etc/traefik/harbr.toml"
+    end
+
+  end
+
+  desc "destroy", "Destroy a container and remove all traces"
+  def destroy(container_name)
+
+    puts "Destroying container: #{container_name}"
+    
+    `sv stop #{container_name}`
+
+    `rm -rf /var/harbr/#{container_name}`
+    `rm -rf /etc/service/#{container_name}`
+    `rm -rf /etc/sv/harbr/#{container_name}`
+    `rm -rf /var/log/harbr/#{container_name}`
+
+
+    container_repo = Harbr::Container::Repository.new
+    container = container_repo.find_name(container_name)
+    container_repo.delete(container)
+    
+    create_traefik_config(container_repo.all)
+
+    puts "Container #{container_name} destroyed successfully."
   end
 
   desc "setup", "Set up Harbr environment"
