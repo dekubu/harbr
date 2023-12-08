@@ -100,9 +100,14 @@ module Harbr
 
       container.name = manifest.name
       container.host_header = manifest.host
-      container.ip = "127.0.0.10"
+      container.ip = "127.0.0.1"
       container.port = manifest.port
-      containers.add(container) unless containers.find_by_header(manifest.host)
+      
+      if containers.find_by_header(manifest.host)
+        containers.update(container)  
+      else
+        containers.create(container)
+      end
 
       system("cd /var/harbr/#{manifest.name}/current && bundle install")
       system("sv restart #{manifest.name}")
