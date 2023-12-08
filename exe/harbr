@@ -4,15 +4,11 @@ require_relative "../lib/harbr"
 class HarbrCLI < Thor
   
   no_commands do
-    def load_manifest(container, version)
+    def load_manifest(container,version)
       manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
-      if File.exist?(manifest_path)
-        manifest_data = YAML.load_file(manifest_path)
-        OpenStruct.new(manifest_data)
-      else
-        puts "Manifest file not found for container '#{container}', version '#{version}'"
-        nil
-      end
+      raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
+      manifest_data = YAML.load_file(manifest_path)
+      OpenStruct.new(manifest_data)
     end
 
     def display_containers_table(containers)
@@ -78,9 +74,10 @@ class HarbrCLI < Thor
     end
 
     def run_tasks(container, version)
-      manifest = load_manifest(container, version)
-      Harbr::Job.perform_async(manifest)
       puts "Running tasks for container: '#{container}', Version: '#{version}'"
+      manifest = load_manifest(container, version)
+      puts "Manifest: #{manifest}"
+      Harbr::Job.perform_async(manifest)
     end
   end
 
