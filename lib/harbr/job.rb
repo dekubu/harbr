@@ -85,11 +85,6 @@ module Harbr
 
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
-
-      Dddr.configure do |config|
-        config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
-      end
-
       create_a_service(manifest.name, manifest.port)
 
       container = Container.new
@@ -99,8 +94,6 @@ module Harbr
       container.host_header = manifest.host
       container.ip = "127.0.0.10"
       container.port = manifest.port
-      
-
       containers.add(container) unless containers.find_by_header(manifest.host)
 
       system("cd /var/harbr/#{manifest.name}/current && bundle install")
