@@ -1,6 +1,14 @@
 module Harbr
   class Job
     include SuckerPunch::Job
+
+    def load_manifest(container,version)
+      manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
+      raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
+      manifest_data = YAML.load_file(manifest_path)
+      OpenStruct.new(manifest_data)
+    end
+
     def create_traefik_config(containers)
       config = {
         "http" => {
@@ -102,7 +110,10 @@ module Harbr
       create_traefik_config(containers.all)
     end
 
-    def perform(manifest)
+    def perform(container, version)
+      puts "Running tasks for container: '#{container}', Version: '#{version}'"
+      manifest = load_manifest(container, version)
+      puts "Manifest: #{manifest}"
       run_container(manifest)
     end
   end
