@@ -133,6 +133,15 @@ class HarbrCLI < Thor
 
   end
 
+  desc "logs CONTAINER", "Show logs for a given container"
+  def logs(container)
+    if container == "container"
+      exec "tail -f /var/logs/harbr/container/current"
+    else
+      puts "Container not recognized"
+    end
+  end
+
   desc "setup", "Set up Harbr environment"
   def setup
     # Check and create /var/harbr directory
