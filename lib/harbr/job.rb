@@ -94,19 +94,20 @@ module Harbr
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
       create_a_service(manifest.name, manifest.port)
-
-      container = Container.new
-      containers = Container::Repository.new
-
-      container.name = manifest.name
-      container.host_header = manifest.host
-      container.ip = "127.0.0.1"
-      container.port = manifest.port
       
-      if containers.find_by_header(manifest.host)
-        containers.update(container)  
-      else
+      containers = Container::Repository.new
+      container = containers.find_by_header(manifest.host)
+
+      if container.nil?
+        container = Container.new 
+        container.name = manifest.name
+        container.host_header = manifest.host
+        container.ip = "127.0.0.1"
+        container.port = manifest.port
         containers.create(container)
+      else
+        container.port = manifest.port      
+        containers.update(container)  
       end
 
       system("cd /var/harbr/#{manifest.name}/current && bundle install")
