@@ -76,6 +76,9 @@ class HarbrCLI < Thor
     end
 
     def create_traefik_config(containers)
+
+      `rm -rf "/etc/traefik/harbr.toml"`
+
       config = {
         "http" => {
           "routers" => {
