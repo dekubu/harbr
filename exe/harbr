@@ -124,6 +124,7 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container_name)
     if container
+      puts `port release #{container.port}`
       container_repo.delete(container) 
       create_traefik_config(container_repo.all)
       puts "Container #{container_name} destroyed successfully."
