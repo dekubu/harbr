@@ -72,7 +72,7 @@ class HarbrCLI < Thor
       puts "waiting for 10 seconds"
       sleep 3
       puts "done waiting"
-      if version == 0
+      if version.to_i == 0
         puts "Initial Deploy!!!"
         Harbr::Job.perform_async(container, version)
       else
