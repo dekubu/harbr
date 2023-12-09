@@ -93,8 +93,11 @@ module Harbr
 
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
-      port = `port `
-      create_a_service(manifest.name, manifest.port)
+      port = `port assign #{port}`.strip
+
+
+
+      create_a_service(manifest.name, port)
       
       containers = Container::Repository.new
       container = containers.find_by_header(manifest.host)
@@ -104,10 +107,10 @@ module Harbr
         container.name = manifest.name
         container.host_header = manifest.host
         container.ip = "127.0.0.1"
-        container.port = manifest.port
+        container.port = port
         containers.create(container)
       else
-        container.port = manifest.port      
+        container.port = port      
         containers.update(container)  
       end
 
