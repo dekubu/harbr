@@ -93,6 +93,7 @@ module Harbr
 
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
+      port = `port `
       create_a_service(manifest.name, manifest.port)
       
       containers = Container::Repository.new
