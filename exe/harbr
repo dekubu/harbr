@@ -73,10 +73,10 @@ class HarbrCLI < Thor
       sleep 3
       puts "done waiting"
       if version.to_i == 0
-        puts "Initial Deploy!!!"
+        puts "Initial Deploy!!! of #{container}"
         Harbr::Job.perform_async(container, version)
       else
-        puts "deploy next version"
+        puts "deploy next version of #{container}"
         
       end
     end
