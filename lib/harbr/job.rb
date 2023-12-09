@@ -43,9 +43,6 @@ module Harbr
     def create_run_script(container_name, port)
       service_dir = "/etc/sv/harbr/#{container_name}"
       
-
-      TODO:: pull the run script from current run
-
       script_template = <<~SCRIPT
         #!/bin/sh
         exec 2>&1
