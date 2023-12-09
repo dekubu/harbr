@@ -70,9 +70,15 @@ class HarbrCLI < Thor
     def run_tasks(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
       puts "waiting for 10 seconds"
-      sleep 10
+      sleep 3
       puts "done waiting"
-      Harbr::Job.perform_async(container, version)
+      if version == 0
+        puts "Initial Deploy!!!"
+        Harbr::Job.perform_async(container, version)
+      else
+        puts "deploy next version"
+        
+      end
     end
 
     def create_traefik_config(containers)
