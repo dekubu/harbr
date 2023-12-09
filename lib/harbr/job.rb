@@ -93,7 +93,7 @@ module Harbr
 
     def run_container(manifest)
       puts "Starting container: #{manifest.name}"
-      port = `port assign #{port}`.strip
+      port = `port assign #{manifest.port}`.strip
 
 
 
