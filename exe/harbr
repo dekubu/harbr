@@ -69,14 +69,14 @@ class HarbrCLI < Thor
 
     def run_tasks(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
-      puts "waiting for 10 seconds"
+      puts "waiting for 3 seconds"
       sleep 3
       puts "done waiting"
       if version.to_i == 0
         puts "Initial Deploy!!! of #{container}"
         Harbr::Job.perform_async(container, version)
       else
-        puts "deploy next version of #{container}"
+        puts "deploy version #{version} of #{container}"
         
       end
     end
