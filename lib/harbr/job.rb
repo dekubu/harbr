@@ -43,11 +43,14 @@ module Harbr
     def create_run_script(container_name, port)
       service_dir = "/etc/sv/harbr/#{container_name}"
       
+
+      TODO:: pull the run script from current run
+
       script_template = <<~SCRIPT
         #!/bin/sh
         exec 2>&1
         cd /var/harbr/#{container_name}/current
-        exec bundle exec puma -p #{port}
+        exec ./exe/run #{port}
       SCRIPT
 
       service_dir = "/etc/sv/harbr/#{container_name}"
@@ -60,7 +63,7 @@ module Harbr
 
     def create_log_script(container_name)
       log_dir = "/var/log/harbr/#{container_name}"
-      
+
       FileUtils.mkdir_p(log_dir)
 
       script_template = <<~SCRIPT
