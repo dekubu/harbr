@@ -192,7 +192,7 @@ class HarbrCLI < Thor
       end
 
       last_known_state = current_state
-      sleep 10 # Poll every 10 seconds
+      sleep 3 # Poll every 10 seconds
     end
   end
 end
