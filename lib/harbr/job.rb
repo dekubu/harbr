@@ -106,6 +106,7 @@ module Harbr
       end
 
       system("cd /var/harbr/#{manifest.name}/current && bundle install")
+      puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
       system("sv restart #{manifest.name}")
       puts "Started container: #{manifest.name}"
       create_traefik_config(containers.all)
