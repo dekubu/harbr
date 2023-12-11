@@ -88,12 +88,8 @@ module Harbr
         port = `port assign next.#{manifest.port}`.strip
         puts "Port assigned: #{port}"
 
-        #puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
-
         `rm -rf /etc/sv/harbr/#{manifest.name}/next`
-        system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
-        puts "Linked to: /etc/sv/harbr/#{manifest.name}/next"
-        
+
         create_a_service(manifest.name, port)
 
         containers = Container::Repository.new
@@ -116,7 +112,14 @@ module Harbr
         system("cd /var/harbr/#{manifest.name}/next && bundle install")        
         system("sv restart next.#{manifest.name}")
         puts "Started container: next.#{manifest.name}"
+
+        system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
+        puts "Linked to: /etc/sv/harbr/#{manifest.name}/next"
+
         create_traefik_config(containers.all)
+
+        puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
+
       end
 
       def perform(container, version)
