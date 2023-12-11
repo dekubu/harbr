@@ -88,7 +88,7 @@ module Harbr
         port = `port assign next.#{manifest.port}`.strip
         puts "Port assigned: #{port}"
 
-        puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
+        #puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
 
         `rm -rf /etc/sv/harbr/#{manifest.name}/next`
         system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
@@ -101,7 +101,7 @@ module Harbr
 
         if container.nil?
           container = Container.new
-          container.name = "next.#{manifest.name}"
+          container.name = "next-#{manifest.name}"
           container.host_header = "next.#{manifest.host}"
           container.ip = "127.0.0.1"
           container.port = port
