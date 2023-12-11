@@ -62,6 +62,7 @@ module Harbr
   
       def create_log_script(container_name)
         log_dir = "/var/log/harbr/#{container_name}/next"
+        
   
         FileUtils.mkdir_p(log_dir)
   
@@ -80,7 +81,8 @@ module Harbr
   
       def create_a_service(container_name, port)
         create_run_script(container_name, port)
-        create_log_script(container_name)
+        create_log_script(container_name)        
+
         system("ln -s /etc/sv/harbr/#{container_name}/next /etc/service/next.#{container_name}") unless File.exist?("/etc/service/next.#{container_name}")
       end
   
@@ -115,7 +117,6 @@ module Harbr
         puts "Running tasks for container: 'next.#{container}', Version: '#{version}'"
         manifest = load_manifest(container, version)
         puts "Manifest: #{manifest}"
-        system("ln -sf /var/harbr/#{container}/versions/#{version} /var/harbr/#{container}/next")
         run_container(manifest)
       end
     end
