@@ -76,7 +76,6 @@ module Harbr
         FileUtils.chmod("+x", "#{dir_path}/run")
         puts "Log script created and made executable for container: next.#{container_name}"
       end
-
       def create_a_service(container_name, port)
         create_run_script(container_name, port)
         create_log_script(container_name)
@@ -86,9 +85,15 @@ module Harbr
 
       def run_container(manifest)
         puts "Starting container: next.#{manifest.name}"
-        port = system("port assign next.#{manifest.port}").strip
+        port = `port assign next.#{manifest.port}"`.strip
         puts "Port assigned: #{port}"
 
+        puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
+
+        `rm -rf /etc/sv/harbr/#{manifest.name}/next`
+        system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
+        puts "Linked to: /etc/sv/harbr/#{manifest.name}/next"
+        
         create_a_service(manifest.name, port)
 
         containers = Container::Repository.new
@@ -108,12 +113,8 @@ module Harbr
 
 
         
-        system("cd /var/harbr/#{manifest.name}/next && bundle install")
-
-
-        puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
+        system("cd /var/harbr/#{manifest.name}/next && bundle install")        
         system("sv restart next.#{manifest.name}")
-
         puts "Started container: next.#{manifest.name}"
         create_traefik_config(containers.all)
       end
