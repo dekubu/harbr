@@ -85,7 +85,7 @@ module Harbr
 
       def run_container(manifest)
         puts "Starting container: next.#{manifest.name}"
-        port = `port assign next.#{manifest.port}"`.strip
+        port = `port assign next.#{manifest.port}`.strip
         puts "Port assigned: #{port}"
 
         puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
