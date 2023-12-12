@@ -24,6 +24,23 @@ module Runit
     end
   end
 
+  class Log
+    def initialize(container, port)
+      @container_name = container
+    end
+
+    def to_s
+      script_template = <<~SCRIPT
+        #!/bin/sh
+        exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+      SCRIPT
+    end
+
+    def link
+      "ln -s /etc/sv/harbr/#{@container_name}/log /etc/service/next.#{@container_name}/log"
+    end
+  end
+
   module Next
     class Run
       def initialize(container, port)
@@ -43,6 +60,18 @@ module Runit
       def link
         "ln -s /etc/sv/harbr/#{@container_name}/next /etc/service/next.#{@container_name}"
       end
+    end
+  end
+
+  RSpec.describe "Next" do
+    def highest_numbered_directory(path)
+      directories = Dir.glob("#{path}/*").select { |entry| File.directory?(entry) }
+      directories.max_by { |entry| entry[/\d+/].to_i }
+    end
+
+    it "should create a run script" do
+      path = highest_numbered_directory("spec/var/harbr/test")
+      expect(path).to eq "spec/var/harbr/test/6"
     end
   end
 
