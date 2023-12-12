@@ -2,7 +2,7 @@ module Harbr
   class Job
     include SuckerPunch::Job
 
-    def load_manifest(container,version)
+    def load_manifest(container, version)
       manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
       raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
       manifest_data = YAML.load_file(manifest_path)
@@ -42,7 +42,7 @@ module Harbr
 
     def create_run_script(container_name, port)
       service_dir = "/etc/sv/harbr/#{container_name}"
-      
+
       script_template = <<~SCRIPT
         #!/bin/sh
         exec 2>&1
@@ -86,23 +86,21 @@ module Harbr
       puts "Starting container: #{manifest.name}"
       port = `port assign #{manifest.port}`.strip
 
-
-
       create_a_service(manifest.name, port)
-      
+
       containers = Container::Repository.new
       container = containers.find_by_header(manifest.host)
 
       if container.nil?
-        container = Container.new 
+        container = Container.new
         container.name = manifest.name
         container.host_header = manifest.host
         container.ip = "127.0.0.1"
         container.port = port
         containers.create(container)
       else
-        container.port = port      
-        containers.update(container)  
+        container.port = port
+        containers.update(container)
       end
 
       system("cd /var/harbr/#{manifest.name}/current && bundle install")

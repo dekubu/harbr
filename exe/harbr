@@ -2,9 +2,7 @@
 require_relative "../lib/harbr"
 
 class HarbrCLI < Thor
-  
   no_commands do
-    
     def display_containers_table(containers)
       return puts "No containers available." if containers.empty?
 
@@ -78,12 +76,11 @@ class HarbrCLI < Thor
       else
         Harbr::Next::Job.perform_async(container, version)
         puts "deploy next version #{version} of #{container}"
-        
+
       end
     end
 
     def create_traefik_config(containers)
-
       `rm -rf "/etc/traefik/harbr.toml"`
 
       config = {
@@ -115,13 +112,11 @@ class HarbrCLI < Thor
       File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
       puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
-
   end
 
   desc "destroy", "Destroy a container and remove all traces"
   def destroy(container_name)
-
-    puts "Destroying container: #{container_name}"    
+    puts "Destroying container: #{container_name}"
     puts `sv stop #{container_name}`
 
     container_repo = Harbr::Container::Repository.new
@@ -129,7 +124,6 @@ class HarbrCLI < Thor
     if container
       puts `port release #{container.port}`
       create_traefik_config(container_repo.all)
-      
 
       `rm -rf /var/harbr/#{container_name}`
       `rm -rf /etc/service/#{container_name}`
@@ -137,23 +131,21 @@ class HarbrCLI < Thor
       `rm -rf /var/log/harbr/#{container_name}`
 
       `lsof -i :#{container.port} | awk 'NR!=1 {print $2}' | xargs kill`
-      container_repo.delete(container) 
+      container_repo.delete(container)
 
       puts "Container #{container_name} destroyed successfully."
 
     else
       puts "Container #{container_name} not found."
     end
-
   end
 
   desc "logs CONTAINER", "Show logs for a given container"
   def logs(container)
-    
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container)
     if container
-      exec "tail -f /var/log/harbr/#{container.name}/current" 
+      exec "tail -f /var/log/harbr/#{container.name}/current"
     else
       puts "Container not recognized"
     end

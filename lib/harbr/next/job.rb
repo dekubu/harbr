@@ -10,12 +10,11 @@ module Harbr
         OpenStruct.new(manifest_data)
       end
 
-      
       def create_traefik_config(containers)
         config = initialize_config
 
         containers.each do |container|
-          container.ip = '127.0.0.1'
+          container.ip = "127.0.0.1"
           add_router_to_config(config, container)
           add_service_to_config(config, container)
         end
@@ -27,38 +26,38 @@ module Harbr
 
       def initialize_config
         {
-          'http' => {
-            'routers' => {
-              'traefik-dashboard' => {
-                'rule' => 'Host(`traefik.harbr.zero2one.ee`)',
-                'service' => 'api@internal'
+          "http" => {
+            "routers" => {
+              "traefik-dashboard" => {
+                "rule" => "Host(`traefik.harbr.zero2one.ee`)",
+                "service" => "api@internal"
               }
             },
-            'services' => {}
+            "services" => {}
           }
         }
       end
 
       def add_router_to_config(config, container)
-        config['http']['routers']["#{container.name}-router"] = {
-          'rule' => "Host(`#{container.host_header}`)",
-          'service' => "#{container.name}-service"
+        config["http"]["routers"]["#{container.name}-router"] = {
+          "rule" => "Host(`#{container.host_header}`)",
+          "service" => "#{container.name}-service"
         }
       end
 
       def add_service_to_config(config, container)
-        config['http']['services']["#{container.name}-service"] = {
-          'loadBalancer' => {
-            'servers' => [{'url' => "http://#{container.ip}:#{container.port}"}]
+        config["http"]["services"]["#{container.name}-service"] = {
+          "loadBalancer" => {
+            "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
           }
         }
       end
 
       def write_config_to_file(config)
-        File.write('/etc/traefik/harbr.toml', TomlRB.dump(config))
-        puts 'Traefik configuration written to /etc/traefik/harbr.toml'
+        File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
+        puts "Traefik configuration written to /etc/traefik/harbr.toml"
       end
-      
+
       def create_run_script(container_name, port)
         service_dir = "/etc/sv/harbr/#{container_name}/next"
 
@@ -94,6 +93,7 @@ module Harbr
         FileUtils.chmod("+x", "#{dir_path}/run")
         puts "Log script created and made executable for container: next.#{container_name}"
       end
+
       def create_a_service(container_name, port)
         create_run_script(container_name, port)
         create_log_script(container_name)
@@ -125,17 +125,13 @@ module Harbr
           containers.update(container)
         end
 
-
-        
-        system("cd /var/harbr/#{manifest.name}/next && bundle install")        
+        system("cd /var/harbr/#{manifest.name}/next && bundle install")
         system("sv restart next.#{manifest.name}")
         puts "Started container: next.#{manifest.name}"
 
         system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
         puts "Linked to: /etc/sv/harbr/#{manifest.name}/next"
 
-
-        
         create_traefik_config(containers.all)
       end
 
