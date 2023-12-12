@@ -10,37 +10,55 @@ module Harbr
         OpenStruct.new(manifest_data)
       end
 
+      
       def create_traefik_config(containers)
-        config = {
-          "http" => {
-            "routers" => {
-              "traefik-dashboard" => {
-                "rule" => "Host(`traefik.harbr.zero2one.ee`)",
-                "service" => "api@internal"
-              }
-            },
-            "services" => {}
-          }
-        }
+        config = initialize_config
 
         containers.each do |container|
-          container.ip = "127.0.0.1"
-
-          config["http"]["routers"]["#{container.name}-router"] = {
-            "rule" => "Host(`#{container.host_header}`)",
-            "service" => "#{container.name}-service"
-          }
-          config["http"]["services"]["#{container.name}-service"] = {
-            "loadBalancer" => {
-              "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
-            }
-          }
+          container.ip = '127.0.0.1'
+          add_router_to_config(config, container)
+          add_service_to_config(config, container)
         end
 
-        File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
-        puts "Traefik configuration written to /etc/traefik/harbr.toml"
+        write_config_to_file(config)
       end
 
+      private
+
+      def initialize_config
+        {
+          'http' => {
+            'routers' => {
+              'traefik-dashboard' => {
+                'rule' => 'Host(`traefik.harbr.zero2one.ee`)',
+                'service' => 'api@internal'
+              }
+            },
+            'services' => {}
+          }
+        }
+      end
+
+      def add_router_to_config(config, container)
+        config['http']['routers']["#{container.name}-router"] = {
+          'rule' => "Host(`#{container.host_header}`)",
+          'service' => "#{container.name}-service"
+        }
+      end
+
+      def add_service_to_config(config, container)
+        config['http']['services']["#{container.name}-service"] = {
+          'loadBalancer' => {
+            'servers' => [{'url' => "http://#{container.ip}:#{container.port}"}]
+          }
+        }
+      end
+
+      def write_config_to_file(config)
+        File.write('/etc/traefik/harbr.toml', TomlRB.dump(config))
+        puts 'Traefik configuration written to /etc/traefik/harbr.toml'
+      end
+      
       def create_run_script(container_name, port)
         service_dir = "/etc/sv/harbr/#{container_name}/next"
 
@@ -116,10 +134,9 @@ module Harbr
         system("ln -s /var/harbr/#{manifest.name}/versions/#{manifest.version}/ /etc/sv/harbr/#{manifest.name}/next")
         puts "Linked to: /etc/sv/harbr/#{manifest.name}/next"
 
+
+        
         create_traefik_config(containers.all)
-
-        puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
-
       end
 
       def perform(container, version)
