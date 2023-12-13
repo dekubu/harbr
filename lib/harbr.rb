@@ -31,7 +31,7 @@ module Harbr
       end
 
       def to_s
-        script_template = <<~SCRIPT
+        <<~SCRIPT
           #!/bin/sh
           exec 2>&1
           cd /var/harbr/#{@container_name}/current
@@ -50,7 +50,7 @@ module Harbr
       end
 
       def to_s
-        script_template = <<~SCRIPT
+        <<~SCRIPT
           #!/bin/sh
           exec svlogd -tt /var/log/harbr/#{@container_name}/next/
         SCRIPT
@@ -69,7 +69,7 @@ module Harbr
         end
 
         def to_s
-          script_template = <<~SCRIPT
+          <<~SCRIPT
             #!/bin/sh
             exec 2>&1
             cd /var/harbr/#{@container_name}/next
@@ -81,24 +81,23 @@ module Harbr
           "ln -s /etc/sv/harbr/#{@container_name}/next /etc/service/next.#{@container_name}"
         end
       end
+
       class Log
         def initialize(container, port)
           @container_name = container
         end
-  
+
         def to_s
-          script_template = <<~SCRIPT
+          <<~SCRIPT
             #!/bin/sh
             exec svlogd -tt /var/log/harbr/#{@container_name}/next/
           SCRIPT
         end
-  
-        def link
 
+        def link
           "ln -s /etc/sv/harbr/#{container_name}/next/log/ /etc/service/next.#{container_name}/log"
         end
       end
-  
     end
   end
 end

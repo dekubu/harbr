@@ -1,14 +1,32 @@
+require 'harbr'
 module Harbr
   class Job
     include SuckerPunch::Job
 
-    def load_manifest(container, version)
-      manifest_path = "/var/harbr/#{container}/versions/#{version}/config/manifest.yml"
-      raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
-      manifest_data = YAML.load_file(manifest_path)
-      OpenStruct.new(manifest_data)
+    def highest_numbered_directory(path)
+      directories = Dir.glob("#{path}/*").select { |entry| File.directory?(entry) }
+      directories.max_by { |entry| entry[/\d+/].to_i }
     end
-
+    
+    def get_container_name(path)
+      File.basename(path)
+    end
+    
+    def check_container_version(name, version)
+      file_path = '/var/harbr/.data/processed_next.txt' # replace with your file path
+      `touch #{file_path}`
+      container_version = "#{name},#{version}"
+    
+      File.open(file_path, 'r') do |file|
+        if file.any? { |line| line.chomp == container_version }
+          puts 'containerised'
+        else
+          result = yield name, version
+          File.write(file_path, "#{container_version}\n", mode: 'a') unless result == false
+        end
+      end
+    end
+    
     def create_traefik_config(containers)
       config = {
         "http" => {
@@ -21,80 +39,35 @@ module Harbr
           "services" => {}
         }
       }
-
+    
       containers.each do |container|
         container.ip = "127.0.0.1"
-
-        config["http"]["routers"]["#{container.name}-router"] = {
+        name = container.name.gsub(".","-")
+    
+        config["http"]["routers"]["#{name}-router"] = {
           "rule" => "Host(`#{container.host_header}`)",
-          "service" => "#{container.name}-service"
+          "service" => "#{name}-service"
         }
-        config["http"]["services"]["#{container.name}-service"] = {
+        config["http"]["services"]["#{name}-service"] = {
           "loadBalancer" => {
             "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
           }
         }
       end
-
+    
       File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
       puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
-
-    def create_run_script(container_name, port)
-      service_dir = "/etc/sv/harbr/#{container_name}"
-
-      script_template = <<~SCRIPT
-        #!/bin/sh
-        exec 2>&1
-        cd /var/harbr/#{container_name}/current
-        exec ./exe/run #{port}
-      SCRIPT
-
-      service_dir = "/etc/sv/harbr/#{container_name}"
-      FileUtils.mkdir_p(service_dir)
-
-      File.write("#{service_dir}/run", script_template)
-      FileUtils.chmod("+x", "#{service_dir}/run")
-      puts "Run script created and made executable for container: #{container_name}"
-    end
-
-    def create_log_script(container_name)
-      log_dir = "/var/log/harbr/#{container_name}"
-
-      FileUtils.mkdir_p(log_dir)
-
-      script_template = <<~SCRIPT
-        #!/bin/sh
-        exec svlogd -tt #{log_dir}/
-      SCRIPT
-
-      dir_path = "/etc/sv/harbr/#{container_name}/log"
-      FileUtils.mkdir_p(dir_path)
-
-      File.write("#{dir_path}/run", script_template)
-      FileUtils.chmod("+x", "#{dir_path}/run")
-      puts "Log script created and made executable for container: #{container_name}"
-    end
-
-    def create_a_service(container_name, port)
-      create_run_script(container_name, port)
-      create_log_script(container_name)
-      system("ln -s /etc/sv/harbr/#{container_name} /etc/service/#{container_name}") unless File.exist?("/etc/service/#{container_name}")
-    end
-
-    def run_container(manifest)
-      puts "Starting container: #{manifest.name}"
-      port = `port assign #{manifest.port}`.strip
-
-      create_a_service(manifest.name, port)
-
-      containers = Container::Repository.new
-      container = containers.find_by_header(manifest.host)
-
+    
+    def collate_containers(name,host,port)
+    
+      containers = Harbr::Container::Repository.new
+      container = containers.find_by_header(host)
+    
       if container.nil?
-        container = Container.new
-        container.name = manifest.name
-        container.host_header = manifest.host
+        container = Harbr::Container.new
+        container.name = name
+        container.host_header =host
         container.ip = "127.0.0.1"
         container.port = port
         containers.create(container)
@@ -102,19 +75,135 @@ module Harbr
         container.port = port
         containers.update(container)
       end
-
-      system("cd /var/harbr/#{manifest.name}/current && bundle install")
-      puts `lsof -i :#{port} | awk 'NR!=1 {print $2}' | xargs kill -9`
-      system("sv restart #{manifest.name}")
-      puts "Started container: #{manifest.name}"
-      create_traefik_config(containers.all)
+      containers.all
+    end
+    
+    
+    module Runit
+    
+      class Run
+        def initialize(container, port)
+          @container_name = container
+          @port = port
+        end
+    
+        def to_s
+          script_template = <<~SCRIPT
+              #!/bin/sh
+              exec 2>&1
+              cd /var/harbr/#{@container_name}/current
+              exec ./exe/run #{@port}
+          SCRIPT
+        end
+    
+        def link
+          "ln -s /etc/sv/harbr/#{@container_name} /etc/service/#{@container_name}"
+        end
+      end
+    
+    
+      class Finish
+        def initialize(port)
+          @port = port
+        end
+    
+        def to_s
+          script_template = <<~SCRIPT
+              #!/bin/sh
+              sleep 3
+              `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+          SCRIPT
+        end
+      end
+    
+      class Log
+        def initialize(container, port)
+          @container_name = container
+        end
+    
+        def to_s
+          script_template = <<~SCRIPT
+              #!/bin/sh
+              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+          SCRIPT
+        end
+    
+      end
+    
+      module Next
+    
+        class Run
+          def initialize(container, port)
+            @container_name = container
+            @port = port
+          end
+    
+          def to_s
+            script_template = <<~SCRIPT
+                #!/bin/sh
+                exec 2>&1
+                cd /var/harbr/containers/#{@container_name}/next
+                exec ./exe/run #{@port}
+            SCRIPT
+          end
+        end
+    
+        class Log
+          def initialize(container)
+            @container_name = container
+          end
+    
+          def to_s
+            script_template = <<~SCRIPT
+                #!/bin/sh
+                exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+            SCRIPT
+          end
+        end
+    
+      end
+    end
+    
+    def write_to_file(path, contents)
+      File.open(path, 'w') do |file|
+        file.write(contents)
+      end
+    end
+    
+    def load_manifest(container, version)
+      manifest_path = "/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml"
+      raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
+      manifest_data = YAML.load_file(manifest_path)
+      OpenStruct.new(manifest_data)
     end
 
-    def perform(container, version)
-      puts "Running tasks for container: '#{container}', Version: '#{version}'"
-      manifest = load_manifest(container, version)
-      puts "Manifest: #{manifest}"
-      run_container(manifest)
+    def perform(name,version)
+      Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
+      `bundle config set --local path 'vendor/bundle'`
+      manifest = load_manifest(name, version)
+      port = `port assign next.#{manifest.port}`.strip
+      system "sv stop #{name}"
+      system 'bundle install'
+      `mkdir -p /etc/sv/harbr/#{name}`
+      `mkdir -p /etc/sv/harbr/#{name}/log`
+
+      write_to_file "/etc/sv/harbr/#{name}/run", Runit::Next::Run.new(name, port).to_s
+      write_to_file "/etc/sv/harbr/#{name}/finish", Runit::Finish.new(port).to_s
+      write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Next::Log.new(name).to_s
+
+      `chmod +x /etc/sv/harbr/#{name}/run`
+      `chmod +x /etc/sv/harbr/#{name}/log/run`
+      `chmod +x /etc/sv/harbr/#{name}/finish`
+
+      system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
+      system "ln -s /etc/sv/harbr/#{name}/next /etc/service/#{name}"
+
+      containers = collate_containers(name, manifest.host, port)
+      create_traefik_config(containers)
+      puts "process #{version} of #{name}"
+      end
     end
+
   end
+
 end
