@@ -184,8 +184,7 @@ module Harbr
 
       def perform
         `bundle config set --local path 'vendor/bundle'`
-        `rm /var/harbr/.data/processed_next.txt`
-
+        
         Dir.glob('/var/harbr/containers/*').select { |f| File.directory? f }.each do |container_path|
           latest_version = highest_numbered_directory("#{container_path}/versions")
           
