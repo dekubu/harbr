@@ -190,7 +190,6 @@ module Harbr
           
           
           system "rm /etc/service/next.#{name}"
-          system "rm /var/harbr/containers/#{name}/next"
           
           system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
           system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
