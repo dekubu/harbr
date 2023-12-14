@@ -77,7 +77,7 @@ module Harbr
           script_template = <<~SCRIPT
               #!/bin/sh
               exec 2>&1
-              cd /var/harbr/#{@container_name}/current
+              cd /var/harbr/containers/#{@container_name}/current
               exec ./exe/run #{@port}
           SCRIPT
         end
@@ -116,38 +116,6 @@ module Harbr
     
       end
     
-      module Next
-    
-        class Run
-          def initialize(container, port)
-            @container_name = container
-            @port = port
-          end
-    
-          def to_s
-            script_template = <<~SCRIPT
-                #!/bin/sh
-                exec 2>&1
-                cd /var/harbr/containers/#{@container_name}/next
-                exec ./exe/run #{@port}
-            SCRIPT
-          end
-        end
-    
-        class Log
-          def initialize(container)
-            @container_name = container
-          end
-    
-          def to_s
-            script_template = <<~SCRIPT
-                #!/bin/sh
-                exec svlogd -tt /var/log/harbr/#{@container_name}/next/
-            SCRIPT
-          end
-        end
-    
-      end
     end
     
     def write_to_file(path, contents)
@@ -173,16 +141,16 @@ module Harbr
       `mkdir -p /etc/sv/harbr/#{name}`
       `mkdir -p /etc/sv/harbr/#{name}/log`
 
-      write_to_file "/etc/sv/harbr/#{name}/run", Runit::Next::Run.new(name, port).to_s
+      write_to_file "/etc/sv/harbr/#{name}/run", Runit::Run.new(name, port).to_s
       write_to_file "/etc/sv/harbr/#{name}/finish", Runit::Finish.new(port).to_s
-      write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Next::Log.new(name).to_s
+      write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Log.new(name).to_s
 
       `chmod +x /etc/sv/harbr/#{name}/run`
       `chmod +x /etc/sv/harbr/#{name}/log/run`
       `chmod +x /etc/sv/harbr/#{name}/finish`
 
-      system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
-      system "ln -s /etc/sv/harbr/#{name}/next /etc/service/#{name}"
+      system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
+      system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/#{name}"
 
       containers = collate_containers(name, manifest.host, port)
       create_traefik_config(containers)
