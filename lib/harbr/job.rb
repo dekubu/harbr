@@ -155,7 +155,7 @@ module Harbr
         `chmod +x /etc/sv/harbr/#{name}/finish`
 
         system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
-        system "ln -sf /etc/sv/harbr/#{name}/current /etc/service/#{name}"
+        system "ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}"
 
         containers = collate_containers(name, manifest.host, port)
         create_traefik_config(containers)
