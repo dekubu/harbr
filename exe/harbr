@@ -169,6 +169,27 @@ class HarbrCLI < Thor
     display_containers_table(container_repo.all)
   end
 
+  desc "deploy", "deploy a container to production"
+  def deploy(name)
+    Dir.chdir("/var/harbr/containers/#{name}/versions") do
+      `cp -r current rollback`
+      `mv next current`
+      `cp -r rollback next`
+      `sv restart #{name}`
+    end 
+
+  end
+
+  desc "rollback", "rollback"
+  def deploy(name)
+    Dir.chdir("/var/harbr/containers/#{name}/versions") do
+      if !File.exist?("rollback")
+        `mv rollback current`
+        `sv restart #{name}`
+      end
+    end 
+
+  end
   desc "monitor", "Monitor /var/harbr/comtainers for new container versions"
   def monitor
     puts "Monitoring /var/harbr/containers for new container versions..."
