@@ -178,7 +178,7 @@ module Harbr
     
         Dir.chdir current_path do
     
-          system "sv stop #{name}"
+          system "sv stop next.#{name}"
           system "bundle install" 
     
           `mkdir -p /etc/sv/harbr/#{name}/next`
@@ -196,7 +196,8 @@ module Harbr
           
           system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
           system "ln -s /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
-    
+
+          system "sv restart next.#{name}"
           containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
           create_traefik_config(containers)
         end

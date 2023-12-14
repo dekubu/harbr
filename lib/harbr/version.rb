@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Harbr
-  VERSION = "0.0.87"
+  VERSION = "0.0.88"
 end
