@@ -103,7 +103,7 @@ module Harbr
       end
     
       class Log
-        def initialize(container, port)
+        def initialize(container)
           @container_name = container
         end
     
@@ -138,7 +138,7 @@ module Harbr
         `bundle config set --local path 'vendor/bundle'`
         manifest = load_manifest(name, version)
         port = `port assign #{manifest.port}`.strip
-        system "sv stop #{name}"
+        system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
         system 'bundle install'
 
         
