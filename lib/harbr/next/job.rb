@@ -194,10 +194,13 @@ module Harbr
           `chmod +x /etc/sv/harbr/#{name}/next/finish`
           
           
-          system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
-          system "ln -s /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
-
+          system "rm /etc/service/next.#{name}"
+          system "rm /var/harbr/containers/#{name}/next"
+          
+          system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
+          system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
           system "sv restart next.#{name}"
+          
           containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
           create_traefik_config(containers)
         end
