@@ -173,7 +173,7 @@ class HarbrCLI < Thor
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
       `cp -r current current.bak`
-      `cp next next.bak`
+      `cp -r next next.bak`
       `mv next current`
       `mv current.bak rollback`
       `mv next.bak next`
@@ -186,9 +186,13 @@ class HarbrCLI < Thor
   def rollback(name)
     Dir.chdir("/var/harbr/containers/#{name}") do
       if !File.exist?("rollback")
+        `cp -r current current.bak`
         `mv rollback current`
+        `cp -r current.bak nex`
         `rm -rf rollback`
-        puts `sv restart #{name}`
+        `sv restart #{name}`
+        `sv restart next.#{name}`
+        puts "rollback successful"
       end
     end 
 
