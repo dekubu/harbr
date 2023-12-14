@@ -12,21 +12,7 @@ module Harbr
       File.basename(path)
     end
     
-    def check_container_version(name, version)
-      file_path = '/var/harbr/.data/processed_next.txt' # replace with your file path
-      `touch #{file_path}`
-      container_version = "#{name},#{version}"
-    
-      File.open(file_path, 'r') do |file|
-        if file.any? { |line| line.chomp == container_version }
-          puts 'containerised'
-        else
-          result = yield name, version
-          File.write(file_path, "#{container_version}\n", mode: 'a') unless result == false
-        end
-      end
-    end
-    
+
     def create_traefik_config(containers)
       config = {
         "http" => {

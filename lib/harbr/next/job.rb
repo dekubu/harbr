@@ -17,20 +17,6 @@ module Harbr
         File.basename(path)
       end
       
-      def check_container_version(name, version)
-        file_path = '/var/harbr/.data/processed_next.txt' # replace with your file path
-        `touch #{file_path}`
-        container_version = "#{name},#{version}"
-      
-        File.open(file_path, 'r') do |file|
-          if file.any? { |line| line.chomp == container_version }
-            puts 'containerised'
-          else
-            result = yield name, version
-            File.write(file_path, "#{container_version}\n", mode: 'a') unless result == false
-          end
-        end
-      end
       
       def create_traefik_config(containers)
         config = {
@@ -184,12 +170,7 @@ module Harbr
 
       def perform(name, version)
         `bundle config set --local path 'vendor/bundle'`
-    
-        container_path = "/var/harbr/containers/#{name}/versions/#{version}"
-        latest_version = highest_numbered_directory("#{container_path}/versions")
-          
-        version = get_container_name(latest_version)
-        name = get_container_name(container_path)
+        
         manifest = load_manifest(name,version)
         current_path = "/var/harbr/containers/#{name}/versions/#{version}"
       
