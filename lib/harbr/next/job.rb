@@ -166,7 +166,8 @@ module Harbr
         `bundle config set --local path 'vendor/bundle'`
         
         manifest = load_manifest(name,version)
-        current_path = "/var/harbr/containers/#{name}/versions/#{version}"
+        
+        current_path = "/var/harbr/containers/#{name}/current"
       
         port = `port assign next.#{manifest.port}`.strip
     
