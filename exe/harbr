@@ -190,6 +190,7 @@ class HarbrCLI < Thor
         `mv rollback current`
         `cp -r current.bak next`
         `rm -rf rollback`
+        `rm -rf current.bak`
         `sv restart #{name}`
         `sv restart next.#{name}`
         puts "rollback successful"
