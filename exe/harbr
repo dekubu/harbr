@@ -173,9 +173,10 @@ class HarbrCLI < Thor
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
       `cp -r current current.bak`
-      `mv current rollback`
+      `cp next next.bak`
       `mv next current`
       `mv current.bak rollback`
+      `mv next.bak next`
       puts `sv restart #{name}`
     end 
 
