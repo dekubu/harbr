@@ -171,7 +171,7 @@ class HarbrCLI < Thor
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
-    Dir.chdir("/var/harbr/containers/#{name}/versions") do
+    Dir.chdir("/var/harbr/containers/#{name}/") do
       `cp -r current rollback`
       `mv next current`
       `cp -r rollback next`
@@ -182,7 +182,7 @@ class HarbrCLI < Thor
 
   desc "rollback", "rollback last deploy"
   def rollback(name)
-    Dir.chdir("/var/harbr/containers/#{name}/versions") do
+    Dir.chdir("/var/harbr/containers/#{name}") do
       if !File.exist?("rollback")
         `mv rollback current`
         `sv restart #{name}`
