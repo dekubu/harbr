@@ -50,22 +50,16 @@ module Harbr
         puts "Traefik configuration written to /etc/traefik/harbr.toml"
       end
       
-      def collate_containers(name,host,port)
+      def collate_containers(name,port, version)
       
         containers = Harbr::Container::Repository.new
-        container = containers.find_by_header(host)
+        container = containers.find_by_name(name)
       
-        if container.nil?
-          container = Harbr::Container.new
-          container.name = name
-          container.host_header =host
-          container.ip = "127.0.0.1"
-          container.port = port
-          containers.create(container)
-        else
-          container.port = port
-          containers.update(container)
-        end
+        container.port = port
+        container.next_version = version
+        contaimer.previous_version = container.current_version     
+        containers.update(container)
+
         containers.all
       end
       
@@ -201,7 +195,7 @@ module Harbr
           system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
           system "sv restart next.#{name}"
           
-          containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
+          containers = collate_containers("next.#{name}",port,version)
           create_traefik_config(containers)
         end
       

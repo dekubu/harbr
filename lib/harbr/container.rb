@@ -1,7 +1,7 @@
 module Harbr
   class Container
     include Dddr::Entity
-    attr_accessor :name, :host_header, :ip, :port
+    attr_accessor :name, :host_header, :ip, :port,:current_version, :next_version,:previous_version
 
     queries do
       def find_by_header(host_header)

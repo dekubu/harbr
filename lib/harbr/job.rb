@@ -56,6 +56,7 @@ module Harbr
         container.host_header =host
         container.ip = "127.0.0.1"
         container.port = port
+        container.current_version = 0
         containers.create(container)
       else
         container.port = port

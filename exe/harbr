@@ -7,10 +7,10 @@ class HarbrCLI < Thor
       return puts "No containers available." if containers.empty?
 
       # Define headers based on Container attributes
-      headers = ["Name", "Host Header", "IP", "Port"]
+      headers = ["Name", "Host Header", "IP", "Port", "Current Version", "Next Version", "Previous Version"]
 
       rows = containers.map do |container|
-        [container.name, container.host_header, container.ip.nil? ? "127.0.0.1" : container.ip, container.port]
+        [container.name, container.host_header, container.ip.nil? ? "127.0.0.1" : container.ip, container.port.to_s, container.current_version, container.next_version, container.previous_version]
       end
 
       table = ::Terminal::Table.new(headings: headers, rows: rows)
