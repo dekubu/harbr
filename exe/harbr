@@ -180,8 +180,8 @@ class HarbrCLI < Thor
 
   end
 
-  desc "rollback", "rollback"
-  def deploy(name)
+  desc "rollback", "rollback last deploy"
+  def rollback(name)
     Dir.chdir("/var/harbr/containers/#{name}/versions") do
       if !File.exist?("rollback")
         `mv rollback current`
