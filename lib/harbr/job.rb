@@ -167,7 +167,7 @@ module Harbr
       Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
       `bundle config set --local path 'vendor/bundle'`
       manifest = load_manifest(name, version)
-      port = `port assign next.#{manifest.port}`.strip
+      port = `port assign #{manifest.port}`.strip
       system "sv stop #{name}"
       system 'bundle install'
       `mkdir -p /etc/sv/harbr/#{name}`
