@@ -144,7 +144,8 @@ module Harbr
         
         `mkdir -p /etc/sv/harbr/#{name}`
         `mkdir -p /etc/sv/harbr/#{name}/log`
-
+        `mkdir -p /var/log/harbr/#{name}`
+      
         write_to_file "/etc/sv/harbr/#{name}/run", Runit::Run.new(name, port).to_s
         write_to_file "/etc/sv/harbr/#{name}/finish", Runit::Finish.new(port).to_s
         write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Log.new(name).to_s
