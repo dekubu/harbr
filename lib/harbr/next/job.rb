@@ -12,7 +12,7 @@ module Harbr
         directories = Dir.glob("#{path}/*").select { |entry| File.directory?(entry) }
         directories.max_by { |entry| entry[/\d+/].to_i }
       end
-      
+
       def get_container_name(path)
         File.basename(path)
       end
@@ -182,51 +182,46 @@ module Harbr
         OpenStruct.new(manifest_data)
       end
 
-      def perform
+      def perform(name, version)
         `bundle config set --local path 'vendor/bundle'`
-        
-        Dir.glob('/var/harbr/containers/*').select { |f| File.directory? f }.each do |container_path|
-          latest_version = highest_numbered_directory("#{container_path}/versions")
+    
+        container_path = "/var/harbr/containers/#{name}/versions/#{version}"
+        latest_version = highest_numbered_directory("#{container_path}/versions")
           
-          version = get_container_name(latest_version)
-          name = get_container_name(container_path)
-          manifest = load_manifest(name,version)
-        
-          check_container_version(name, version) do
-        
-            current_path = "/var/harbr/containers/#{name}/versions/#{version}"
-        
-            port = `port assign next.#{manifest.port}`.strip
-        
-            Dir.chdir current_path do
-        
-              system "sv stop #{name}"
-              system "bundle install" 
-        
-              `mkdir -p /etc/sv/harbr/#{name}/next`
-              `mkdir -p /etc/sv/harbr/#{name}/next/log`
-              `mkdir -p /var/log/harbr/#{name}/next/log`
-        
-              write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name,port).to_s
-              write_to_file "/etc/sv/harbr/#{name}/next/finish", Runit::Finish.new(port).to_s
-              write_to_file "/etc/sv/harbr/#{name}/next/log/run", Runit::Next::Log.new(name).to_s
-              
-              `chmod +x /etc/sv/harbr/#{name}/next/run`
-              `chmod +x /etc/sv/harbr/#{name}/next/log/run`
-              `chmod +x /etc/sv/harbr/#{name}/next/finish`
-              
-              
-              system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
-              system "ln -s /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
-        
-              containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
-              create_traefik_config(containers)
-            end
-        
-            puts "process #{version} of #{name}" 
-          end
+        version = get_container_name(latest_version)
+        name = get_container_name(container_path)
+        manifest = load_manifest(name,version)
+        current_path = "/var/harbr/containers/#{name}/versions/#{version}"
+      
+        port = `port assign next.#{manifest.port}`.strip
+    
+        Dir.chdir current_path do
+    
+          system "sv stop #{name}"
+          system "bundle install" 
+    
+          `mkdir -p /etc/sv/harbr/#{name}/next`
+          `mkdir -p /etc/sv/harbr/#{name}/next/log`
+          `mkdir -p /var/log/harbr/#{name}/next/log`
+    
+          write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name,port).to_s
+          write_to_file "/etc/sv/harbr/#{name}/next/finish", Runit::Finish.new(port).to_s
+          write_to_file "/etc/sv/harbr/#{name}/next/log/run", Runit::Next::Log.new(name).to_s
+          
+          `chmod +x /etc/sv/harbr/#{name}/next/run`
+          `chmod +x /etc/sv/harbr/#{name}/next/log/run`
+          `chmod +x /etc/sv/harbr/#{name}/next/finish`
+          
+          
+          system "ln -s /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
+          system "ln -s /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
+    
+          containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
+          create_traefik_config(containers)
         end
-
+      
+        puts "process #{version} of #{name}"         
+        
       end
 
     end

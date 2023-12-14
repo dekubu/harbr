@@ -60,12 +60,12 @@ class HarbrCLI < Thor
         puts "Container '#{container}', Version '#{version}' is already placed."
       else
         puts "Placing container: '#{container}', Version: '#{version}'"
-        run_tasks(container, version)
+        run_jobs(container, version)
         File.open(PLACED_FILE, "a") { |file| file.puts("#{container}/#{version}") }
       end
     end
 
-    def run_tasks(container, version)
+    def run_jobs(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
       puts "waiting for 3 seconds"
       sleep 3
@@ -176,7 +176,7 @@ class HarbrCLI < Thor
 
     loop do
       current_state = scan_for_containers
-      new_versions = current_state.keys - last_known_state.keysß
+      new_versions = current_state.keys - last_known_state.keys
 
       new_versions.each do |container_version|
         container, version = container_version.split("/versions/")
