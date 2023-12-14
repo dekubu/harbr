@@ -57,7 +57,7 @@ module Harbr
       
         container.port = port
         container.next_version = version
-        contaimer.previous_version = container.current_version     
+        container.previous_version = container.current_version     
         containers.update(container)
 
         containers.all
