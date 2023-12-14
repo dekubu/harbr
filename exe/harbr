@@ -175,7 +175,7 @@ class HarbrCLI < Thor
       `cp -r current current.bak`
       `mv current rollback`
       `mv next current`
-      `mv curtent.bak rollback`
+      `mv current.bak rollback`
       puts `sv restart #{name}`
     end 
 
@@ -186,7 +186,7 @@ class HarbrCLI < Thor
     Dir.chdir("/var/harbr/containers/#{name}") do
       if !File.exist?("rollback")
         `mv rollback current`
-        `rm  rollback current`
+        `rm -rf rollback`
         puts `sv restart #{name}`
       end
     end 
