@@ -179,6 +179,7 @@ class HarbrCLI < Thor
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
       live_path = highest_numbered_directory(Dir.pwd)
+      `rm -rf current`
       `ln -sf #{live_path} #{Dir.pwd}/current`
       puts `sv restart #{name}`
     end 
