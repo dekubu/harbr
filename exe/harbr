@@ -178,6 +178,12 @@ class HarbrCLI < Thor
   desc "deploy", "deploy a container to production"
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
+      
+      /(?<current>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/current`)
+      
+      `rm -r rollback`
+      `ln -sf #{$2} rollback`
+
       /(?<next>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/next`)
       `rm -r current`
       `ln -sf #{$2} current`
