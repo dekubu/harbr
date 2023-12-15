@@ -172,14 +172,9 @@ class HarbrCLI < Thor
   desc "deploy", "deploy a container to production"
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
-      `cp -r current current.bak`
-      `cp -r next next.bak`
       `mv next current`
-      `mv current.bak rollback`
-      `mv next.bak next`
-      puts `sv restart #{name}`
+      puts `sv restart next.#{name}`
     end 
-
   end
 
   desc "rollback", "rollback last deploy"
@@ -216,6 +211,6 @@ class HarbrCLI < Thor
       sleep 3 # Poll every 10 seconds
     end
   end
-end
+e97c9a8d5810ffad0d42894905b218a655e8732b7nd
 
 HarbrCLI.start(ARGV)
