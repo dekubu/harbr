@@ -211,6 +211,5 @@ class HarbrCLI < Thor
       sleep 3 # Poll every 10 seconds
     end
   end
-e97c9a8d5810ffad0d42894905b218a655e8732b7nd
-
+end
 HarbrCLI.start(ARGV)
