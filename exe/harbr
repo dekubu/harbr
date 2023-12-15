@@ -178,10 +178,10 @@ class HarbrCLI < Thor
   desc "deploy", "deploy a container to production"
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
-      live_path = highest_numbered_directory(Dir.pwd)
-      `rm -rf current`
-      `ln -sf #{live_path} #{Dir.pwd}/current`
-      puts `sv restart #{name}`
+      /(?<next>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/next`)
+      `rm -r current`
+      `ln -sf #{$2} current`
+      `sv restart #{name}`
     end 
   end
 
