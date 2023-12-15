@@ -3,6 +3,12 @@ require_relative "../lib/harbr"
 
 class HarbrCLI < Thor
   no_commands do
+    def highest_numbered_directory(path)
+      directories = Dir.glob("#{path}/*").select { |entry| File.directory?(entry) }
+      directories.max_by { |entry| entry[/\d+/].to_i }
+    end
+
+
     def display_containers_table(containers)
       return puts "No containers available." if containers.empty?
 
@@ -172,8 +178,9 @@ class HarbrCLI < Thor
   desc "deploy", "deploy a container to production"
   def deploy(name)
     Dir.chdir("/var/harbr/containers/#{name}/") do
-      `mv next current`
-      puts `sv restart next.#{name}`
+      live_path = highest_numbered_directory(Dir.pwd)
+      `ln -sf #{live_path} #{Dir.pwd}/current`
+      puts `sv restart #{name}`
     end 
   end
 
