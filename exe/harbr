@@ -189,13 +189,12 @@ class HarbrCLI < Thor
   def rollback(name)
     Dir.chdir("/var/harbr/containers/#{name}") do
       if File.exist?("rollback")
-        `cp -r current current.bak`
-        `mv rollback current`
-        `cp -r current.bak next`
-        `rm -rf rollback`
-        `rm -rf current.bak`
-        `sv restart #{name}`
-        `sv restart next.#{name}`
+        Dir.chdir("/var/harbr/containers/#{name}/") do
+          /(?<current>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/rollback`)
+          `rm -r current`
+          `ln -sf #{$2} current`
+          `sv restart #{name}`
+        end 
         puts "rollback successful"
       end
     end 
