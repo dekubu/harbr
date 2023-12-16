@@ -83,7 +83,7 @@ module Harbr
                 #!/bin/sh
                 exec 2>&1
                 cd /var/harbr/#{@container_name}/current
-                exec ./exe/run #{@port}
+                exec HARBR_ENV=next ./exe/run #{@port}
             SCRIPT
           end
       
