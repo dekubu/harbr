@@ -148,7 +148,6 @@ class HarbrCLI < Thor
   desc "logs", "Show logs"
   def logs
       exec "tail -f /var/log/harbr/current"
-    end
   end
 
 desc "peek CONTAINER", "Peek in a given container"
