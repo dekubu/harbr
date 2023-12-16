@@ -83,7 +83,7 @@ module Harbr
                 #!/bin/sh
                 exec 2>&1
                 cd /var/harbr/#{@container_name}/current
-                exec ./exe/run #{@port}, next
+                exec ./exe/run #{@port} live
             SCRIPT
           end
       
@@ -134,7 +134,7 @@ module Harbr
                   #!/bin/sh
                   exec 2>&1
                   cd /var/harbr/containers/#{@container_name}/next
-                  exec ./exe/run #{@port}, next
+                  exec ./exe/run #{@port} next
               SCRIPT
             end
           end

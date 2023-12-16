@@ -78,7 +78,7 @@ module Harbr
               #!/bin/sh
               exec 2>&1    
               cd /var/harbr/containers/#{@container_name}/current
-              exec HARBR_ENV=production ./exe/run #{@port}
+              exec ./exe/run #{@port} live 
           SCRIPT
         end
     
