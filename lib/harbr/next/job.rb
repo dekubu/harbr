@@ -54,6 +54,8 @@ module Harbr
           }
         end
 
+        puts config 
+        
         File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
         puts "Traefik configuration written to /etc/traefik/harbr.toml"
 
@@ -209,10 +211,10 @@ module Harbr
           system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
           system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
           system "sv restart next.#{name}"
-
-          containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
-          create_traefik_config(containers)
         end
+
+        containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
+        create_traefik_config(containers)
 
         puts "process #{version} of #{name}"         
 
