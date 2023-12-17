@@ -25,8 +25,7 @@ module Harbr
             "routers" => {
               "traefik-dashboard" => {
                 "rule" => "Host(`traefik.harbr.zero2one.ee`)",
-                "service" => "api@internal",
-                "tls" => {}  # Enable TLS for the dashboard
+                "service" => "api@internal"
               }
             },
             "services" => {}
@@ -40,10 +39,7 @@ module Harbr
           # Create the router with TLS enabled
           config["http"]["routers"]["#{name}-router"] = {
             "rule" => "Host(`#{container.host_header}`)",
-            "service" => "#{name}-service",
-            "tls" => {
-              "certResolver" => "letsencrypt"  # Specify the certificate resolver for TLS
-            }
+            "service" => "#{name}-service"
           }
 
           # Create the service
