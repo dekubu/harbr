@@ -48,7 +48,9 @@ module Harbr
         }
       end
 
-      config
+
+      File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
+      puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
 
     def collate_containers(name,host,port)
