@@ -51,7 +51,7 @@ module Harbr
         end
 
         puts config 
-        
+
         File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
         puts "Traefik configuration written to /etc/traefik/harbr.toml"
 
@@ -206,6 +206,10 @@ module Harbr
 
           system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
           system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
+
+          `rsync -av /var/dddr/#{name}/live  /var/dddr/#{name}/next`
+          puts "sync live data to next"
+
           system "sv restart next.#{name}"
         end
 

@@ -193,8 +193,6 @@ desc "peek CONTAINER", "Peek in a given container"
       /(?<next>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/next`)
       `rm -r current`
       `ln -sf #{$2} current`
-      `rsync -av /var/dddr/#{name}/live  /var/dddr/#{name}/next`
-      puts "sync live data to next"
       `sv restart #{name}`
     end 
   end
