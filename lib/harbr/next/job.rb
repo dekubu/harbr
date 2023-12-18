@@ -17,15 +17,14 @@ module Harbr
         File.basename(path)
       end
 
-
-
       def create_traefik_config(containers)
         config = {
           "http" => {
             "routers" => {
               "traefik-dashboard" => {
                 "rule" => "Host(`traefik.harbr.zero2one.ee`)",
-                "service" => "api@internal"
+                "service" => "api@internal",
+                "tls" => {}  # Enable TLS for the dashboard
               }
             },
             "services" => {}
@@ -36,10 +35,15 @@ module Harbr
           container.ip = "127.0.0.1"
           name = container.name.gsub(".", "-")
 
-          # Create the router with TLS enabled
-          config["http"]["routers"]["#{name}-router"] = {
+          # Create the router with TLS enabled and specific format
+          router_key = "#{name}-router-secure"
+          config["http"]["routers"][router_key] = {
             "rule" => "Host(`#{container.host_header}`)",
-            "service" => "#{name}-service"
+            "service" => "#{name}-service",
+            "entryPoints" => ["https"],
+            "tls" => {
+              "certResolver" => "myresolver"  # Use a custom certificate resolver
+            }
           }
 
           # Create the service
@@ -50,12 +54,12 @@ module Harbr
           }
         end
 
-        puts config 
-
+        # Write the configuration to a TOML file
         File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
         puts "Traefik configuration written to /etc/traefik/harbr.toml"
-
       end
+
+
 
       def collate_containers(name,host,port)
 
