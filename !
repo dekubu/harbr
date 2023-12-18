@@ -31,14 +31,12 @@ module Harbr
         container.ip = "127.0.0.1"
         name = container.name.gsub(".", "-")
 
-        # Create the router with TLS enabled and specific format
-        router_key = "#{name}-router-secure"
-        config["http"]["routers"][router_key] = {
+        # Create the router with TLS enabled
+        config["http"]["routers"]["#{name}-router"] = {
           "rule" => "Host(`#{container.host_header}`)",
           "service" => "#{name}-service",
-          "entryPoints" => ["https"],
           "tls" => {
-            "certResolver" => "myresolver"  # Use a custom certificate resolver
+            "certResolver" => "letsencrypt"  # Specify the certificate resolver for TLS
           }
         }
 
@@ -50,7 +48,7 @@ module Harbr
         }
       end
 
-      # Write the configuration to a TOML file
+
       File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
       puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
