@@ -173,13 +173,7 @@ desc "peek CONTAINER", "Peek in a given container"
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
-
-  
-    if version.to_i == 0
-      puts "Initial Deploy!!! of #{container}"
-      Harbr::Job.perform_async(container, version)
-    end
-        
+            
     Dir.chdir("/var/harbr/containers/#{name}/") do
       
       /(?<current>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/current`)
