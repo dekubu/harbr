@@ -8,11 +8,6 @@ module Harbr
     class Job
       include SuckerPunch::Job
 
-      def highest_numbered_directory(path)
-        directories = Dir.glob("#{path}/*").select { |entry| File.directory?(entry) }
-        directories.max_by { |entry| entry[/\d+/].to_i }
-      end
-
       def get_container_name(path)
         File.basename(path)
       end
