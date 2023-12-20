@@ -112,24 +112,26 @@ class HarbrCLI < Thor
   desc "destroy", "Destroy a container and remove all traces"
   def destroy(container_name)
     puts "Destroying container: #{container_name}"
-    puts `sv stop #{container_name}`
-
+    
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container_name)
-    if container
-      puts `port release #{container.port}`
-      create_traefik_config(container_repo.all)
 
-      `rm -rf /var/harbr/#{container_name}`
+    if container
+  
       `rm -rf /etc/service/#{container_name}`
       `rm -rf /etc/sv/harbr/#{container_name}`
+
+      `rm -rf /var/harbr/containers/#{container_name}`
       `rm -rf /var/log/harbr/#{container_name}`
-
-      `lsof -i :#{container.port} | awk 'NR!=1 {print $2}' | xargs kill`
+      
+      
       container_repo.delete(container)
-
       puts "Container #{container_name} destroyed successfully."
+      
+      `port release #{container.port}`
+      puts "released port #{container.port} successfully."
 
+      create_traefik_config(container_repo.all)
     else
       puts "Container #{container_name} not found."
     end
@@ -173,7 +175,7 @@ desc "peek CONTAINER", "Peek in a given container"
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
-            
+
     Dir.chdir("/var/harbr/containers/#{name}/") do
       
       /(?<current>. * -> (?<path>.*))/.match(`ls -l /var/harbr/containers/#{name}/current`)
