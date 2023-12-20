@@ -79,6 +79,8 @@ class HarbrCLI < Thor
       if version.to_i == 0
         puts "Initial Deploy!!! of #{container}"
         Harbr::Job.perform_async(container, version)
+        Harbr::Next::Job.perform_async(container, version)
+        puts "deploy next version #{version} of #{container}"
       else
         Harbr::Next::Job.perform_async(container, version)
         puts "deploy next version #{version} of #{container}"
