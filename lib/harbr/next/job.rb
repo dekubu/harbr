@@ -1,8 +1,8 @@
-require 'yaml'
-require 'ostruct'
-require 'sucker_punch'
+require "yaml"
+require "ostruct"
+require "sucker_punch"
 
-require 'harbr'
+require "harbr"
 module Harbr
   module Next
     class Job
@@ -28,7 +28,7 @@ module Harbr
 
         containers.each do |container|
           container.ip = "127.0.0.1"
-          name = container.name.gsub(".", "-")
+          name = container.name.tr(".", "-")
 
           # Create the router with TLS enabled and specific format
           router_key = "#{name}-router-secure"
@@ -54,17 +54,14 @@ module Harbr
         puts "Traefik configuration written to /etc/traefik/harbr.toml"
       end
 
-
-
-      def collate_containers(name,host,port)
-
+      def collate_containers(name, host, port)
         containers = Harbr::Container::Repository.new
         container = containers.find_by_header(host)
 
         if container.nil?
           container = Harbr::Container.new
           container.name = name
-          container.host_header =host
+          container.host_header = host
           container.ip = "127.0.0.1"
           container.port = port
           containers.create(container)
@@ -75,9 +72,7 @@ module Harbr
         containers.all
       end
 
-
       module Runit
-
         class Run
           def initialize(container, port)
             @container_name = container
@@ -86,10 +81,10 @@ module Harbr
 
           def to_s
             script_template = <<~SCRIPT
-            #!/bin/sh
-            exec 2>&1
-            cd /var/harbr/#{@container_name}/current
-            exec ./exe/run #{@port} live
+              #!/bin/sh
+              exec 2>&1
+              cd /var/harbr/#{@container_name}/current
+              exec ./exe/run #{@port} live
             SCRIPT
           end
 
@@ -98,7 +93,6 @@ module Harbr
           end
         end
 
-
         class Finish
           def initialize(port)
             @port = port
@@ -106,9 +100,9 @@ module Harbr
 
           def to_s
             script_template = <<~SCRIPT
-            #!/bin/sh
-            sleep 3
-            `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+              #!/bin/sh
+              sleep 3
+              `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
             SCRIPT
           end
         end
@@ -120,15 +114,13 @@ module Harbr
 
           def to_s
             script_template = <<~SCRIPT
-            #!/bin/sh
-            exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+              #!/bin/sh
+              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
             SCRIPT
           end
-
         end
 
         module Next
-
           class Run
             def initialize(container, port)
               @container_name = container
@@ -137,10 +129,10 @@ module Harbr
 
             def to_s
               script_template = <<~SCRIPT
-              #!/bin/sh
-              exec 2>&1
-              cd /var/harbr/containers/#{@container_name}/next
-              exec ./exe/run #{@port} next
+                #!/bin/sh
+                exec 2>&1
+                cd /var/harbr/containers/#{@container_name}/next
+                exec ./exe/run #{@port} next
               SCRIPT
             end
           end
@@ -152,19 +144,16 @@ module Harbr
 
             def to_s
               script_template = <<~SCRIPT
-              #!/bin/sh
-              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+                #!/bin/sh
+                exec svlogd -tt /var/log/harbr/#{@container_name}/next/
               SCRIPT
             end
           end
-
         end
       end
 
       def write_to_file(path, contents)
-        File.open(path, 'w') do |file|
-          file.write(contents)
-        end
+        File.write(path, contents)
       end
 
       def load_manifest(container, version)
@@ -177,28 +166,26 @@ module Harbr
       def perform(name, version)
         `bundle config set --local path 'vendor/bundle'`
 
-        manifest = load_manifest(name,version)
+        manifest = load_manifest(name, version)
         current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
         port = `port assign next.#{manifest.port}`.strip
 
         Dir.chdir current_path do
-
           system "sv stop next.#{name}"
-          system "bundle install" 
+          system "bundle install"
 
           `mkdir -p /etc/sv/harbr/#{name}/next`
           `mkdir -p /etc/sv/harbr/#{name}/next/log`
           `mkdir -p /var/log/harbr/#{name}/next/log`
 
-          write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name,port).to_s
+          write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name, port).to_s
           write_to_file "/etc/sv/harbr/#{name}/next/finish", Runit::Finish.new(port).to_s
           write_to_file "/etc/sv/harbr/#{name}/next/log/run", Runit::Next::Log.new(name).to_s
 
           `chmod +x /etc/sv/harbr/#{name}/next/run`
           `chmod +x /etc/sv/harbr/#{name}/next/log/run`
           `chmod +x /etc/sv/harbr/#{name}/next/finish`
-
 
           system "rm /etc/service/next.#{name}"
           system "rm /var/harbr/containers/#{name}/next"
@@ -212,14 +199,11 @@ module Harbr
           system "sv restart next.#{name}"
         end
 
-        containers = collate_containers("next.#{name}","next.#{manifest.host}",port)
+        containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
         create_traefik_config(containers)
 
-        puts "process #{version} of #{name}"         
-
+        puts "process #{version} of #{name}"
       end
-
     end
-
   end
 end
