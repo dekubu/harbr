@@ -199,7 +199,7 @@ class HarbrCLI < Thor
   end
   desc "monitor", "Monitor /var/harbr/comtainers for new container versions"
   def monitor
-    puts "version: (#{Harbr::VERSION}})"
+    puts "version: (#{Harbr::VERSION})"
     puts "Monitoring /var/harbr/containers for new container versions..."
 
     last_known_state = {}
