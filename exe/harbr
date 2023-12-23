@@ -117,15 +117,17 @@ class HarbrCLI < Thor
 
     [name, "next.#{name}"].each do |container_name|
       container = container_repo.find_by_name(container_name)
-      `port release #{container.port}` if container
-      container_repo.delete(container) if container
+      if container
+        `port release #{container.port}` 
+        puts "released port #{container.port} successfully."
+        container_repo.delete(container)
+      end
 
       `rm -rf /etc/service/#{container_name}`
       `rm -rf /etc/sv/harbr/#{container_name}`
-
+      
       puts "Container #{container_name} destroyed successfully."
       
-      puts "released port #{container.port} successfully."
     end
 
     `rm -rf /var/harbr/containers/#{name}`

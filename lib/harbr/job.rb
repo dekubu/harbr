@@ -129,11 +129,14 @@ module Harbr
 
     def perform(name, version)
       Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
-        `bundle config set --local path 'vendor/bundle'`
+        
         manifest = load_manifest(name, version)
         port = `port assign #{manifest.port}`.strip
         system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
-        system "bundle install" if File.exist?("Gemfile")
+        if File.exist?("Gemfile")
+          `bundle config set --local path 'vendor/bundle'`
+          system "bundle install" 
+        end
 
         `mkdir -p /etc/sv/harbr/#{name}`
         `mkdir -p /etc/sv/harbr/#{name}/log`
