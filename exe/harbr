@@ -70,8 +70,10 @@ class HarbrCLI < Thor
       sleep 1
       if version.to_i == 0
         Harbr::Job.perform_async(container, version)
+      else
+        Harbr::Next::Job.perform_async(container, version)
       end
-      Harbr::Next::Job.perform_async(container, version)
+            
       puts "deploy next version #{version} of #{container}"
     end
 
@@ -125,7 +127,7 @@ class HarbrCLI < Thor
 
       `rm -rf /etc/service/#{container_name}`
       `rm -rf /etc/sv/harbr/#{container_name}`
-      
+
       puts "Container #{container_name} destroyed successfully."
       
     end

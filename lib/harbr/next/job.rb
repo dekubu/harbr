@@ -164,8 +164,7 @@ module Harbr
       end
 
       def perform(name, version)
-        `bundle config set --local path 'vendor/bundle'`
-
+        
         manifest = load_manifest(name, version)
         current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
@@ -173,7 +172,10 @@ module Harbr
 
         Dir.chdir current_path do
           system "sv stop next.#{name}"
-          system "bundle install" if File.exist?("Gemfile")
+          if File.exist?("Gemfile")
+            `bundle config set --local path 'vendor/bundle'`
+            system "bundle install"
+          end
           
 
           `mkdir -p /etc/sv/harbr/#{name}/next`
@@ -202,8 +204,7 @@ module Harbr
 
         containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
         create_traefik_config(containers)
-
-        puts "process #{version} of #{name}"
+        puts "harbr: #{version} of #{name}"         
       end
     end
   end
