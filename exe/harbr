@@ -145,8 +145,8 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container)
     if container
-      exec "tail -f /var/log/harbr/#{container.name}/next/current" if options[:next]
       exec "tail -f /var/log/harbr/#{container.name}/current" if options[:live]
+      exec "tail -f /var/log/harbr/#{container.name}/next/current" if options[:next]
     else
       puts "Container not recognized"
     end
