@@ -173,7 +173,8 @@ module Harbr
 
         Dir.chdir current_path do
           system "sv stop next.#{name}"
-          system "bundle install"
+          system "bundle install" if File.exist?("Gemfile")
+          
 
           `mkdir -p /etc/sv/harbr/#{name}/next`
           `mkdir -p /etc/sv/harbr/#{name}/next/log`

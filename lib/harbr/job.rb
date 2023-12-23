@@ -133,7 +133,7 @@ module Harbr
         manifest = load_manifest(name, version)
         port = `port assign #{manifest.port}`.strip
         system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
-        system "bundle install"
+        system "bundle install" if File.exist?("Gemfile")
 
         `mkdir -p /etc/sv/harbr/#{name}`
         `mkdir -p /etc/sv/harbr/#{name}/log`
