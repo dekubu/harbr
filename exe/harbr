@@ -139,11 +139,14 @@ class HarbrCLI < Thor
   end
 
   desc "peek CONTAINER", "Peek in a given container"
+  method_option :live, type: :boolean, aliases: "-l", desc: "Process in live mode"
+  method_option :next, type: :boolean, default: "default", aliases: "-n", desc: "Process in next mode"
   def peek(container)
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container)
     if container
-      exec "tail -f /var/log/harbr/#{container.name}/current"
+      exec "tail -f /var/log/harbr/#{container.name}/next/current" if options[:next]
+      exec "tail -f /var/log/harbr/#{container.name}/current" if options[:live]
     else
       puts "Container not recognized"
     end
