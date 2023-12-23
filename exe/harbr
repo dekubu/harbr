@@ -140,7 +140,7 @@ class HarbrCLI < Thor
 
   desc "peek CONTAINER", "Peek in a given container"
   method_option :live, type: :boolean, aliases: "-l", desc: "Process in live mode"
-  method_option :next, type: :boolean, default: "default", aliases: "-n", desc: "Process in next mode"
+  method_option :next, type: :boolean, default: true, aliases: "-n", desc: "Process in next mode"
   def peek(container)
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container)
