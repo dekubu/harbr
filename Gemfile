@@ -16,3 +16,5 @@ gem "terminal-table", "~> 3.0"
 gem "sucker_punch", "~> 3.1"
 
 gem "toml-rb", "~> 2.2"
+
+gem "resend", "~> 0.8.1"

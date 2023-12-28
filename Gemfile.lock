@@ -1,12 +1,14 @@
 PATH
   remote: .
   specs:
-    harbr (0.0.26)
+    harbr (0.1.29)
       dddr (~> 1.0.4)
       listen (~> 3.8)
+      portr (~> 0.0.2)
       sucker_punch (~> 3.1.0)
       terminal-table (= 3.0.2)
       thor (~> 1.3)
+      toml-rb (~> 2.2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -18,16 +20,24 @@ GEM
       sdbm (~> 1.0)
     diff-lcs (1.5.0)
     ffi (1.16.3)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     json (2.7.0)
     language_server-protocol (3.17.0.3)
     lint_roller (1.1.0)
     listen (3.8.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
+    mini_mime (1.1.5)
+    multi_xml (0.6.0)
     parallel (1.23.0)
     parser (3.2.2.4)
       ast (~> 2.4.1)
       racc
+    portr (0.0.2)
+      json (~> 2.3)
+      thor (~> 1.0)
     racc (1.7.3)
     rainbow (3.1.1)
     rake (13.1.0)
@@ -35,6 +45,8 @@ GEM
     rb-inotify (0.10.1)
       ffi (~> 1.0)
     regexp_parser (2.8.2)
+    resend (0.8.1)
+      httparty (>= 0.19.1)
     rexml (3.2.6)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
@@ -94,6 +106,7 @@ PLATFORMS
 DEPENDENCIES
   harbr!
   rake (~> 13.0)
+  resend (~> 0.8.1)
   rspec (~> 3.0)
   standard (~> 1.3)
   sucker_punch (~> 3.1)
