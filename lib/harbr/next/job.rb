@@ -164,8 +164,9 @@ module Harbr
       end
 
       def perform(name, version)
-        
-        manifest = load_manifest(name, version)
+
+        Harbr.notifiable do
+          manifest = load_manifest(name, version)
         current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
         port = `port assign next.#{manifest.port}`.strip
@@ -204,7 +205,9 @@ module Harbr
 
         containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
         create_traefik_config(containers)
-        puts "harbr: #{version} of #{name}"         
+        puts "harbr: #{version} of #{name}"  
+        end
+
       end
     end
   end
