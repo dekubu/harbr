@@ -6,6 +6,7 @@ require "toml-rb"
 require "fileutils"
 require "ostruct"
 require "sucker_punch"
+require 'resend'
 
 require_relative "harbr/version"
 require_relative "harbr/container"
@@ -17,6 +18,25 @@ module Harbr
   DEFAULT_DIRECTORY = "/var/harbr/containers"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
   class Error < StandardError; end
+
+  def self.send_notification(subject, body)
+    begin
+      Resend.api_key = ENV['RESEND_API_KEY']
+      params = {
+        from: ENV['RESEND_FROM'],
+        to: ENV['RESEND_TO'],
+        subject: subject,
+        html: body
+      }
+      
+      Resend::Emails.send(params)
+    rescue => e
+      puts "Error sending notification: #{e.message}"
+      return
+    end
+    
+  end
+
 end
 
 Dddr.configure do |config|
