@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "toml-rb", "~> 2.2.0"
   spec.add_dependency "portr", "~> 0.0.2"
   spec.add_dependency "dddr", "~> 1.0.4"
+  spec.add_dependency "resend", "~> 0.8.1"
   spec.add_dependency "sucker_punch", "~> 3.1.0"
   spec.add_dependency "terminal-table", "3.0.2"
 end
