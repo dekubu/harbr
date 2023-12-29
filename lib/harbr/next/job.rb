@@ -80,11 +80,11 @@ module Harbr
           end
 
           def to_s
-            script_template = <<~SCRIPT
-              #!/bin/sh
-              exec 2>&1
-              cd /var/harbr/#{@container_name}/current
-              exec ./exe/run #{@port} live
+            <<~SCRIPT
+            #!/bin/sh
+            exec 2>&1
+            cd /var/harbr/#{@container_name}/current
+            exec ./exe/run #{@port} live
             SCRIPT
           end
 
@@ -99,10 +99,10 @@ module Harbr
           end
 
           def to_s
-            script_template = <<~SCRIPT
-              #!/bin/sh
-              sleep 3
-              `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+            <<~SCRIPT
+            #!/bin/sh
+            sleep 3
+            `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
             SCRIPT
           end
         end
@@ -113,9 +113,9 @@ module Harbr
           end
 
           def to_s
-            script_template = <<~SCRIPT
-              #!/bin/sh
-              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+            <<~SCRIPT
+            #!/bin/sh
+            exec svlogd -tt /var/log/harbr/#{@container_name}/next/
             SCRIPT
           end
         end
@@ -128,11 +128,11 @@ module Harbr
             end
 
             def to_s
-              script_template = <<~SCRIPT
-                #!/bin/sh
-                exec 2>&1
-                cd /var/harbr/containers/#{@container_name}/next
-                exec ./exe/run #{@port} next
+              <<~SCRIPT
+              #!/bin/sh
+              exec 2>&1
+              cd /var/harbr/containers/#{@container_name}/next
+              exec ./exe/run #{@port} next
               SCRIPT
             end
           end
@@ -143,9 +143,9 @@ module Harbr
             end
 
             def to_s
-              script_template = <<~SCRIPT
-                #!/bin/sh
-                exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+              <<~SCRIPT
+              #!/bin/sh
+              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
               SCRIPT
             end
           end
@@ -167,45 +167,44 @@ module Harbr
 
         Harbr.notifiable do
           manifest = load_manifest(name, version)
-        current_path = "/var/harbr/containers/#{name}/versions/#{version}"
+          current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
-        port = `port assign next.#{manifest.port}`.strip
+          port = `port assign next.#{manifest.port}`.strip
 
-        Dir.chdir current_path do
-          system "sv stop next.#{name}"
-          if File.exist?("Gemfile")
-            `bundle config set --local path 'vendor/bundle'`
-            system "bundle install"
+          Dir.chdir current_path do
+            system "sv stop next.#{name}"
+            if File.exist?("Gemfile")
+              `bundle config set --local path 'vendor/bundle'`
+              system "bundle install"
+            end
+
+            `mkdir -p /etc/sv/harbr/#{name}/next`
+            `mkdir -p /etc/sv/harbr/#{name}/next/log`
+            `mkdir -p /var/log/harbr/#{name}/next/log`
+
+            write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name, port).to_s
+            write_to_file "/etc/sv/harbr/#{name}/next/finish", Runit::Finish.new(port).to_s
+            write_to_file "/etc/sv/harbr/#{name}/next/log/run", Runit::Next::Log.new(name).to_s
+
+            `chmod +x /etc/sv/harbr/#{name}/next/run`
+            `chmod +x /etc/sv/harbr/#{name}/next/log/run`
+            `chmod +x /etc/sv/harbr/#{name}/next/finish`
+
+            system "rm /etc/service/next.#{name}"
+            system "rm /var/harbr/containers/#{name}/next"
+
+            system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
+            system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
+
+            `rsync -av /var/dddr/#{name}/live  /var/dddr/#{name}/next`
+            puts "sync live data to next"
+
+            system "sv restart next.#{name}"
           end
-          
 
-          `mkdir -p /etc/sv/harbr/#{name}/next`
-          `mkdir -p /etc/sv/harbr/#{name}/next/log`
-          `mkdir -p /var/log/harbr/#{name}/next/log`
-
-          write_to_file "/etc/sv/harbr/#{name}/next/run", Runit::Next::Run.new(name, port).to_s
-          write_to_file "/etc/sv/harbr/#{name}/next/finish", Runit::Finish.new(port).to_s
-          write_to_file "/etc/sv/harbr/#{name}/next/log/run", Runit::Next::Log.new(name).to_s
-
-          `chmod +x /etc/sv/harbr/#{name}/next/run`
-          `chmod +x /etc/sv/harbr/#{name}/next/log/run`
-          `chmod +x /etc/sv/harbr/#{name}/next/finish`
-
-          system "rm /etc/service/next.#{name}"
-          system "rm /var/harbr/containers/#{name}/next"
-
-          system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next"
-          system "ln -sf /etc/sv/harbr/#{name}/next /etc/service/next.#{name}"
-
-          `rsync -av /var/dddr/#{name}/live  /var/dddr/#{name}/next`
-          puts "sync live data to next"
-
-          system "sv restart next.#{name}"
-        end
-
-        containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
-        create_traefik_config(containers)
-        puts "harbr: #{version} of #{name}"  
+          containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
+          create_traefik_config(containers)
+          puts "harbr: #{version} of #{name}"
         end
 
       end

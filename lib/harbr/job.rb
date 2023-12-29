@@ -75,7 +75,7 @@ module Harbr
         end
 
         def to_s
-          script_template = <<~SCRIPT
+          <<~SCRIPT
             #!/bin/sh
             exec 2>&1    
             cd /var/harbr/containers/#{@container_name}/current
@@ -94,7 +94,7 @@ module Harbr
         end
 
         def to_s
-          script_template = <<~SCRIPT
+          <<~SCRIPT
             #!/bin/sh
             sleep 3
             `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
@@ -108,7 +108,7 @@ module Harbr
         end
 
         def to_s
-          script_template = <<~SCRIPT
+          <<~SCRIPT
             #!/bin/sh
             exec svlogd -tt /var/log/harbr/#{@container_name}
           SCRIPT
@@ -129,13 +129,12 @@ module Harbr
 
     def perform(name, version)
       Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
-        
         manifest = load_manifest(name, version)
         port = `port assign #{manifest.port}`.strip
         system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
         if File.exist?("Gemfile")
           `bundle config set --local path 'vendor/bundle'`
-          system "bundle install" 
+          system "bundle install"
         end
 
         `mkdir -p /etc/sv/harbr/#{name}`
