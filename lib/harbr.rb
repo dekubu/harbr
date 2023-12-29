@@ -28,7 +28,7 @@ module Harbr
               <p>#{e.backtrace.join('<br>')}</p>
               <p>harbr: #{version} of #{name} failed to deploy</p>"
       Harbr.send_notification("Harbr: #{name} failed to deploy",html_content)
-    
+    end
   end
 
   def self.send_notification(subject, body)
