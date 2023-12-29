@@ -19,7 +19,7 @@ module Harbr
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
   class Error < StandardError; end
 
-  def self.notifiable
+  def self.notifiable(name,version)
     begin
       yield if block_given?
       send_notification("Harbr: #{name} deployed successfully","<p>harbr: #{version} of #{name} deployed successfully</p>")

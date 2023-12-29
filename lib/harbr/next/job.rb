@@ -165,7 +165,7 @@ module Harbr
 
       def perform(name, version)
 
-        Harbr.notifiable do
+        Harbr.notifiable(name,version) do
           manifest = load_manifest(name, version)
           current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 

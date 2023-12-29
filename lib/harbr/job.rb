@@ -76,10 +76,10 @@ module Harbr
 
         def to_s
           <<~SCRIPT
-            #!/bin/sh
-            exec 2>&1    
-            cd /var/harbr/containers/#{@container_name}/current
-            exec ./exe/run #{@port} live 
+          #!/bin/sh
+          exec 2>&1    
+          cd /var/harbr/containers/#{@container_name}/current
+          exec ./exe/run #{@port} live 
           SCRIPT
         end
 
@@ -95,9 +95,9 @@ module Harbr
 
         def to_s
           <<~SCRIPT
-            #!/bin/sh
-            sleep 3
-            `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+          #!/bin/sh
+          sleep 3
+          `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
           SCRIPT
         end
       end
@@ -109,8 +109,8 @@ module Harbr
 
         def to_s
           <<~SCRIPT
-            #!/bin/sh
-            exec svlogd -tt /var/log/harbr/#{@container_name}
+          #!/bin/sh
+          exec svlogd -tt /var/log/harbr/#{@container_name}
           SCRIPT
         end
       end
@@ -128,33 +128,38 @@ module Harbr
     end
 
     def perform(name, version)
-      Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
-        manifest = load_manifest(name, version)
-        port = `port assign #{manifest.port}`.strip
-        system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
-        if File.exist?("Gemfile")
-          `bundle config set --local path 'vendor/bundle'`
-          system "bundle install"
+
+      Harbr.notifiable(name,version) do
+
+        Dir.chdir "/var/harbr/containers/#{name}/versions/#{version}" do
+          manifest = load_manifest(name, version)
+          port = `port assign #{manifest.port}`.strip
+          system "sv stop #{name}" if File.exist?("/etc/service/#{name}")
+          if File.exist?("Gemfile")
+            `bundle config set --local path 'vendor/bundle'`
+            system "bundle install"
+          end
+
+          `mkdir -p /etc/sv/harbr/#{name}`
+          `mkdir -p /etc/sv/harbr/#{name}/log`
+          `mkdir -p /var/log/harbr/#{name}`
+
+          write_to_file "/etc/sv/harbr/#{name}/run", Runit::Run.new(name, port).to_s
+          write_to_file "/etc/sv/harbr/#{name}/finish", Runit::Finish.new(port).to_s
+          write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Log.new(name).to_s
+
+          `chmod +x /etc/sv/harbr/#{name}/run`
+          `chmod +x /etc/sv/harbr/#{name}/log/run`
+          `chmod +x /etc/sv/harbr/#{name}/finish`
+
+          system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
+          system "ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}"
+
+          containers = collate_containers(name, manifest.host, port)
+          create_traefik_config(containers)
+          puts "process #{version} of #{name}"
         end
 
-        `mkdir -p /etc/sv/harbr/#{name}`
-        `mkdir -p /etc/sv/harbr/#{name}/log`
-        `mkdir -p /var/log/harbr/#{name}`
-
-        write_to_file "/etc/sv/harbr/#{name}/run", Runit::Run.new(name, port).to_s
-        write_to_file "/etc/sv/harbr/#{name}/finish", Runit::Finish.new(port).to_s
-        write_to_file "/etc/sv/harbr/#{name}/log/run", Runit::Log.new(name).to_s
-
-        `chmod +x /etc/sv/harbr/#{name}/run`
-        `chmod +x /etc/sv/harbr/#{name}/log/run`
-        `chmod +x /etc/sv/harbr/#{name}/finish`
-
-        system "ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current"
-        system "ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}"
-
-        containers = collate_containers(name, manifest.host, port)
-        create_traefik_config(containers)
-        puts "process #{version} of #{name}"
       end
     end
   end
