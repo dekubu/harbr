@@ -19,6 +19,18 @@ module Harbr
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
   class Error < StandardError; end
 
+  def self.notifiable
+    begin
+      yield if block_given?
+      send_notification("Harbr: #{name} deployed successfully","<p>harbr: #{version} of #{name} deployed successfully</p>")
+    rescue => e
+      html_content = "<p>Error: #{e.message}</p>
+              <p>#{e.backtrace.join('<br>')}</p>
+              <p>harbr: #{version} of #{name} failed to deploy</p>"
+      Harbr.send_notification("Harbr: #{name} failed to deploy",html_content)
+    
+  end
+
   def self.send_notification(subject, body)
     begin
       Resend.api_key = ENV['RESEND_API_KEY']
