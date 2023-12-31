@@ -8,6 +8,23 @@ module Harbr
     class Job
       include SuckerPunch::Job
 
+
+      def check
+        sleep_times = [1, 3, 5, 8, 23]
+        begin
+          result = yield if block_given?
+          unless result
+            sleep_times.each do |time|
+              result = yield if block_given?
+              break if result
+              sleep(time)
+            end
+          end
+        rescue => e
+          puts "Error: #{e.message}"
+        end
+      end
+
       def get_container_name(path)
         File.basename(path)
       end
@@ -163,12 +180,33 @@ module Harbr
         OpenStruct.new(manifest_data)
       end
 
+      def check
+        sleep_times = [1, 3, 5, 8, 23]
+        begin
+          result = yield if block_given?
+          unless result
+            sleep_times.each do |time|
+              result = yield if block_given?
+              break if result
+              sleep(time)
+            end
+          end
+        rescue => e
+          puts "Error: #{e.message}"
+        end
+      end
+
       def perform(name, version)
         Harbr.notifiable(name, version) do
           manifest = load_manifest(name, version)
           current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
           port = `port assign next.#{manifest.port}`.strip
+          
+          check do
+            puts "Waiting for container #{current_path} 5to be available..."
+            Dir.exist?(current_path)
+          end
 
           Dir.chdir current_path do
             system "sv stop next.#{name}"
