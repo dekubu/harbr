@@ -203,7 +203,7 @@ module Harbr
 
           containers = collate_containers("next.#{name}", "next.#{manifest.host}", port)
           create_traefik_config(containers)
-          puts "harbr: #{version} of #{name}"
+          puts "harbr: #{version} of #{name} into next environment"
         end
       end
     end
