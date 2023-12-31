@@ -85,8 +85,7 @@ class HarbrCLI < Thor
       
       puts "Running tasks for container: #{container}, version: #{version}"
 
-      if !Dir.exist?("/var/harbr/containers/#{container}/current")
-
+      if !Dir.exist?("/var/harbr/containers/#{container}/current") || version.to_i == 0
         check do
           puts "Waiting for container #{container} manifest to be available..."
           Dir.exist?("/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml")
