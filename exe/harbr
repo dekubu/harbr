@@ -92,7 +92,8 @@ class HarbrCLI < Thor
           Dir.exist?("/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml")
         end
 
-        Harbr::Job.perform_async(container, versio,"live")
+        Harbr::Job.perform_async(container, version,"current")
+        puts "deploy current version #{version} of #{container}"        
       else
         sleep 3
         Harbr::Job.perform_async(container, version,"next")
