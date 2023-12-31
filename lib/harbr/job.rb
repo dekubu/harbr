@@ -99,12 +99,12 @@ module Harbr
 
     def process_container(name, version, port, env, manifest)
       env_path = "/var/harbr/containers/#{name}/#{env}"
-      system "sv stop #{env}.#{name}" if env == 'next'
+      system "sv stop #{env}.#{name}" if env == "next"
 
       bundle_install_if_needed(env_path)
       create_runit_scripts(name, port, env)
       link_directories(name, version, env)
-      sync_live_data_if_next(name) if env == 'next'
+      sync_live_data_if_next(name) if env == "next"
 
       containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port)
       create_traefik_config(containers)
