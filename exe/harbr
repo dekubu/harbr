@@ -70,7 +70,7 @@ class HarbrCLI < Thor
 
       sleep 1
 
-      if !File.exist?("/var/harbr/containers/#{container}/current")
+      if !Dir.exist?("/var/harbr/containers/#{container}/current")
         Harbr::Job.perform_async(container, version)
       end
 
@@ -206,6 +206,12 @@ class HarbrCLI < Thor
       end
     end
   end
+
+  desc "update", "update to the latest version of harbr"
+  def update
+    system "gem update harbr && sv stop harbr && sv start harbr"
+  end
+
   desc "monitor", "Monitor /var/harbr/comtainers for new container versions"
   def monitor
     puts "version: (#{Harbr::VERSION})"

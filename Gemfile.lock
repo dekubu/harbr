@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    harbr (0.1.30)
+    harbr (0.1.36)
       dddr (~> 1.0.4)
       listen (~> 3.8)
       portr (~> 0.0.2)
+      resend (~> 0.8.1)
       sucker_punch (~> 3.1.0)
       terminal-table (= 3.0.2)
       thor (~> 1.3)

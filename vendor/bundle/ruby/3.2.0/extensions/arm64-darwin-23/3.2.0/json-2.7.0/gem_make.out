@@ -1,0 +1,16 @@
+current directory: /Users/db/Lab/projects/harbr/vendor/bundle/ruby/3.2.0/gems/json-2.7.0/ext/json
+/Users/db/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/db/Lab/projects/harbr/vendor/bundle/ruby/3.2.0/gems/json-2.7.0/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20231231-37230-qv4dxe sitelibdir\=./.gem.20231231-37230-qv4dxe clean
+
+current directory: /Users/db/Lab/projects/harbr/vendor/bundle/ruby/3.2.0/gems/json-2.7.0/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20231231-37230-qv4dxe sitelibdir\=./.gem.20231231-37230-qv4dxe
+make: Nothing to be done for `all'.
+
+current directory: /Users/db/Lab/projects/harbr/vendor/bundle/ruby/3.2.0/gems/json-2.7.0/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20231231-37230-qv4dxe sitelibdir\=./.gem.20231231-37230-qv4dxe install
+
+current directory: /Users/db/Lab/projects/harbr/vendor/bundle/ruby/3.2.0/gems/json-2.7.0/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20231231-37230-qv4dxe sitelibdir\=./.gem.20231231-37230-qv4dxe clean

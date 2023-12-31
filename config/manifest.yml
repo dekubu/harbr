@@ -1,5 +1,5 @@
 ---
 name: harbr
-version: '0'
+version: 1
 port: harbr.app
 host: harbr.harbr.zero2one.ee
