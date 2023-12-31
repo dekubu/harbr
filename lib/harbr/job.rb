@@ -1,9 +1,3 @@
-require "yaml"
-require "ostruct"
-require "sucker_punch"
-require "harbr"
-require "tomlrb"
-
 module Harbr
   class Job
     include SuckerPunch::Job
