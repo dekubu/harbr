@@ -6,7 +6,7 @@ require "toml-rb"
 require "fileutils"
 require "ostruct"
 require "sucker_punch"
-require 'resend'
+require "resend"
 
 require_relative "harbr/version"
 require_relative "harbr/container"
@@ -20,36 +20,29 @@ module Harbr
   class Error < StandardError; end
 
   def self.send_notification(subject, body)
-    begin
-      
-      Resend.api_key = ENV['RESEND_API_KEY']
+    Resend.api_key = ENV["RESEND_API_KEY"]
 
-      params = {
-        from: ENV['RESEND_FROM'],
-        to: ENV['RESEND_TO'],
-        subject: subject,
-        html: body
-      }
-      
-      Resend::Emails.send(params)
-    rescue => e
-      puts "Error sending notification: #{e.message}"
-    end
-    
+    params = {
+      from: ENV["RESEND_FROM"],
+      to: ENV["RESEND_TO"],
+      subject: subject,
+      html: body
+    }
+
+    Resend::Emails.send(params)
+  rescue => e
+    puts "Error sending notification: #{e.message}"
   end
 
-  def self.notifiable(name,version)
-    begin
-      yield if block_given?
-      send_notification("Harbr: #{name} deployed successfully","<p>harbr: #{version} of #{name} deployed successfully</p>")
-    rescue => e
-      html_content = "<p>Error: #{e.message}</p>
-              <p>#{e.backtrace.join('<br>')}</p>
+  def self.notifiable(name, version)
+    yield if block_given?
+    send_notification("Harbr: #{name} deployed successfully", "<p>harbr: #{version} of #{name} deployed successfully</p>")
+  rescue => e
+    html_content = "<p>Error: #{e.message}</p>
+              <p>#{e.backtrace.join("<br>")}</p>
               <p>harbr: #{version} of #{name} failed to deploy</p>"
-      send_notification("Harbr: #{name} failed to deploy",html_content)
-    end
+    send_notification("Harbr: #{name} failed to deploy", html_content)
   end
-
 end
 
 Dddr.configure do |config|

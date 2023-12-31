@@ -81,10 +81,10 @@ module Harbr
 
           def to_s
             <<~SCRIPT
-            #!/bin/sh
-            exec 2>&1
-            cd /var/harbr/#{@container_name}/current
-            exec ./exe/run #{@port} live
+              #!/bin/sh
+              exec 2>&1
+              cd /var/harbr/#{@container_name}/current
+              exec ./exe/run #{@port} live
             SCRIPT
           end
 
@@ -100,9 +100,9 @@ module Harbr
 
           def to_s
             <<~SCRIPT
-            #!/bin/sh
-            sleep 3
-            `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+              #!/bin/sh
+              sleep 3
+              `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
             SCRIPT
           end
         end
@@ -114,8 +114,8 @@ module Harbr
 
           def to_s
             <<~SCRIPT
-            #!/bin/sh
-            exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+              #!/bin/sh
+              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
             SCRIPT
           end
         end
@@ -129,10 +129,10 @@ module Harbr
 
             def to_s
               <<~SCRIPT
-              #!/bin/sh
-              exec 2>&1
-              cd /var/harbr/containers/#{@container_name}/next
-              exec ./exe/run #{@port} next
+                #!/bin/sh
+                exec 2>&1
+                cd /var/harbr/containers/#{@container_name}/next
+                exec ./exe/run #{@port} next
               SCRIPT
             end
           end
@@ -144,8 +144,8 @@ module Harbr
 
             def to_s
               <<~SCRIPT
-              #!/bin/sh
-              exec svlogd -tt /var/log/harbr/#{@container_name}/next/
+                #!/bin/sh
+                exec svlogd -tt /var/log/harbr/#{@container_name}/next/
               SCRIPT
             end
           end
@@ -164,8 +164,7 @@ module Harbr
       end
 
       def perform(name, version)
-
-        Harbr.notifiable(name,version) do
+        Harbr.notifiable(name, version) do
           manifest = load_manifest(name, version)
           current_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
@@ -206,7 +205,6 @@ module Harbr
           create_traefik_config(containers)
           puts "harbr: #{version} of #{name}"
         end
-
       end
     end
   end
