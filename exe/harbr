@@ -93,12 +93,13 @@ class HarbrCLI < Thor
         end
 
         Harbr::Job.perform_async(container, version)
+      else
+        sleep 3
+        Harbr::Next::Job.perform_async(container, version)
+        puts "deploy next version #{version} of #{container}"        
       end
       
-      sleep 3
       
-      Harbr::Next::Job.perform_async(container, version)
-      puts "deploy next version #{version} of #{container}"
 
     end
 
