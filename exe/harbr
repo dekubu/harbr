@@ -83,22 +83,10 @@ class HarbrCLI < Thor
 
     def run_jobs(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
-
       if version.to_i == 0
-      
-        Harbr::Job.perform_async(container, version, "current")
-        puts "deploy current version #{version} of #{container}"
-      
-      elsif !Dir.exist?("/var/harbr/containers/#{container}/current")
-        check do
-          puts "Waiting for container #{container} manifest to be available..."
-          Dir.exist?("/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml")
-        end
-
         Harbr::Job.perform_async(container, version, "current")
         puts "deploy current version #{version} of #{container}"
       else
-        sleep 3
         Harbr::Job.perform_async(container, version, "next")
         puts "deploy next version #{version} of #{container}"
       end
