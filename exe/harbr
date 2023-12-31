@@ -67,12 +67,14 @@ class HarbrCLI < Thor
 
     def run_jobs(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
+
       sleep 1
-      if version.to_i == 0 or !File.exist?("/var/harbr/containers/#{container}/current")
+
+      if !File.exist?("/var/harbr/containers/#{container}/current")
         Harbr::Job.perform_async(container, version)
-      else
-        Harbr::Next::Job.perform_async(container, version)
       end
+
+      Harbr::Next::Job.perform_async(container, version)
 
       puts "deploy next version #{version} of #{container}"
     end
