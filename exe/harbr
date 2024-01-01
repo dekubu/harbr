@@ -193,7 +193,7 @@ class HarbrCLI < Thor
           exec svlogd -tt /var/log/harbr/harbr
         SCRIPT
     
-    write_to_file("/etc/sv/harbr/run", harbr_script)
+    write_to_file("/etc/sv/harbr/run", run_script)
     write_to_file("/etc/sv/harbr/log/run", log_script)
     
     `chmod +x /etc/sv/harbr/run`
