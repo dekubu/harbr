@@ -41,7 +41,8 @@ module Harbr
 
   def self.notifiable(name, version,env)
     yield if block_given?
-    send_notification("Harbr: #{env} #{name} deployed successfully", "<p>harbr: #{version} of #{name} deployed successfully</p>")
+    env = "live" if env == "current"
+    send_notification("Harbr: #{name} deployed to #{env} successfully", "<p>harbr: #{version} of #{name} deployed to #{env} successfully</p>")
   rescue => e
     html_content = <<~HTML
     <p>Error: #{e.message}</p>
