@@ -76,7 +76,7 @@ module Harbr
     end
 
     def perform(name, version, env)
-      Harbr.notifiable(name, version) do
+      Harbr.notifiable(name, version,env) do
         manifest = load_manifest(name, version)
         port = `port assign #{env}.#{manifest.port}`.strip
         process_container(name,version,port,env,manifest)
