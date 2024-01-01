@@ -123,8 +123,8 @@ module Harbr
 
       version_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
-      system "sv stop #{env}.#{name}" if env == "next"
-      system "sv stop #{name}" if env == "current"
+      #system "sv stop #{env}.#{name}" if env == "next"
+      #system "sv stop #{name}" if env == "current"
 
       bundle_install_if_needed(version_path)
 
@@ -137,8 +137,8 @@ module Harbr
 
       create_traefik_config(containers)
 
-      system "sv start #{env}.#{name}" if env == "next"
-      system "sv start #{name}" if env == "current"
+      system "sv restart #{env}.#{name}" if env == "next"
+      system "sv restart #{name}" if env == "current"
       
 
 
@@ -180,7 +180,7 @@ module Harbr
         `chmod +x /etc/sv/harbr/#{name}/finish`
         `chmod +x /etc/sv/harbr/#{name}/log/run`
         `mkdir -p /var/log/harbr/#{name}`
-        
+
       end
 
       
@@ -225,21 +225,22 @@ module Harbr
           exec 2>&1
           cd /var/harbr/containers/#{@container_name}/#{@env}
           exec ./exe/run #{@port} #{@env}
+          echo "started #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def finish_script
         <<~SCRIPT
           #!/bin/sh
-          sleep 1
           lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
-          sleep 1
+          echo "killed #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def log_script
         <<~SCRIPT
           #!/bin/sh
+          echo "starting log for #{@container_name} on port #{@port}"
           exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}/
         SCRIPT
       end

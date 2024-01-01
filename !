@@ -1,0 +1,51 @@
+release 0.1.60
+
+add logging and fix finisg script
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is up to date with 'origin/main'.
+#
+# Changes to be committed:
+#	modified:   lib/harbr/job.rb
+#	modified:   lib/harbr/version.rb
+#
+# ------------------------ >8 ------------------------
+# Do not modify or remove the line above.
+# Everything below it will be ignored.
+diff --git a/lib/harbr/job.rb b/lib/harbr/job.rb
+index 747fa75..6ece813 100644
+--- a/lib/harbr/job.rb
++++ b/lib/harbr/job.rb
+@@ -169,15 +169,18 @@ module Harbr
+         `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
+         `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
+         `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
++        `mkdir -p /var/log/harbr/#{name}/#{env}`
+       end
+ 
+       if env == "current"
+         write_to_file "/etc/sv/harbr/#{name}/run", run_script
+         write_to_file "/etc/sv/harbr/#{name}/log/run", log_script
+-        write_to_file "/etc/sv/harbr/#{name}/log/finish", finish_script
++        write_to_file "/etc/sv/harbr/#{name}/finish", finish_script
+         `chmod +x /etc/sv/harbr/#{name}/run`
+         `chmod +x /etc/sv/harbr/#{name}/finish`
+         `chmod +x /etc/sv/harbr/#{name}/log/run`
++        `mkdir -p /var/log/harbr/#{name}`
++        
+       end
+ 
+       
+diff --git a/lib/harbr/version.rb b/lib/harbr/version.rb
+index 89cc745..88176bf 100644
+--- a/lib/harbr/version.rb
++++ b/lib/harbr/version.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: true
+ 
+ module Harbr
+-  VERSION = "0.1.59"
++  VERSION = "0.1.60"
+ end
