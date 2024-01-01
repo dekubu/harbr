@@ -83,13 +83,8 @@ class HarbrCLI < Thor
 
     def run_jobs(container, version)
       puts "Running tasks for container: #{container}, version: #{version}"
-      if version.to_i == 0
-        Harbr::Job.perform_async(container, version, "current")
-        puts "deploy current version #{version} of #{container}"
-      else
-        Harbr::Job.perform_async(container, version, "next")
-        puts "deploy next version #{version} of #{container}"
-      end
+      Harbr::Job.perform_async(container, version, "next")
+      puts "deploy next version #{version} of #{container}"
     end
 
     def create_traefik_config(containers)
@@ -192,17 +187,15 @@ class HarbrCLI < Thor
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
+    
     Dir.chdir("/var/harbr/containers/#{name}/") do
-      /(?:. * -> (?:.*))/ =~ `ls -l /var/harbr/containers/#{name}/current`
-
-      `rm -r rollback`
-      `ln -sf #{$2} rollback`
-
       /(?:. * -> (?:.*))/ =~ `ls -l /var/harbr/containers/#{name}/next`
-      `rm -r current`
-      `ln -sf #{$2} current`
-      `sv restart #{name}`
+      version = $2      
     end
+        
+    Harbr::Job.perform_async(name, version, "current")
+    puts "deploy current version #{version} of #{container}"
+
   end
 
   desc "rollback", "rollback last deploy"
