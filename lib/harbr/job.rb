@@ -58,12 +58,17 @@ module Harbr
       containers.all
     end
 
+
     def write_to_file(path, contents)
+      dirname = File.dirname(path)
+      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
+
       File.write(path, contents)
     end
 
-    def load_manifest(container, version)
-      manifest_path = "/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml"
+    def load_manifest(name, version)
+      manifest_path = "/var/harbr/containers/#{name}/versions/#{version}/config/manifest.yml"
+      check_file_exists(manifest_path)
       raise "Manifest not found at #{manifest_path}" unless File.exist?(manifest_path)
 
       manifest_data = YAML.load_file(manifest_path)
@@ -72,23 +77,23 @@ module Harbr
 
     def perform(name, version, env)
       Harbr.notifiable(name, version) do
-        version_path = "/var/harbr/containers/#{name}/versions/#{version}"
-        check_dir_exists(version_path)
-
         manifest = load_manifest(name, version)
         port = `port assign #{env}.#{manifest.port}`.strip
-
-        process_container(name, version, port, env, manifest)
+        process_container(name,version,port,env,manifest)
       end
     end
 
     private
 
-    def check_dir_exists(path)
+    def check_file_exists(path)
       sleep_times = [1, 3, 5, 8, 23]
       begin
         sleep_times.each do |time|
-          return if Dir.exist?(path)
+          puts "checking #{path}...."
+          if File.exist?(path)
+            puts "found #{path}"
+            return
+          end
           sleep(time)
         end
         raise "Directory not found: #{path}"
@@ -112,6 +117,11 @@ module Harbr
 
       containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port)
       create_traefik_config(containers)
+
+      system "sv start #{env}.#{name}" if env == "next"
+      system "sv start #{name}" if env == "current"
+
+
       puts "harbr: #{version} of #{name} in #{env} environment"
     end
 
@@ -130,12 +140,10 @@ module Harbr
       log_script = Runit::Script.new(name, port, env).log_script
 
       write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
-      write_to_file "/etc/sv/harbr/#{name}/#{env}/finish", finish_script
       write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
 
       `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
       `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
-      `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
     end
 
     def link_directories(name, version, env)
