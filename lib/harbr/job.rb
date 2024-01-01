@@ -169,15 +169,18 @@ module Harbr
         `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
         `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
         `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
+        `mkdir -p /var/log/harbr/#{name}/#{env}`
       end
 
       if env == "current"
         write_to_file "/etc/sv/harbr/#{name}/run", run_script
         write_to_file "/etc/sv/harbr/#{name}/log/run", log_script
-        write_to_file "/etc/sv/harbr/#{name}/log/finish", finish_script
+        write_to_file "/etc/sv/harbr/#{name}/finish", finish_script
         `chmod +x /etc/sv/harbr/#{name}/run`
         `chmod +x /etc/sv/harbr/#{name}/finish`
         `chmod +x /etc/sv/harbr/#{name}/log/run`
+        `mkdir -p /var/log/harbr/#{name}`
+        
       end
 
       
