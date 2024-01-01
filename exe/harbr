@@ -190,7 +190,7 @@ class HarbrCLI < Thor
 
     log_script = <<~SCRIPT
           #!/bin/sh
-          exec svlogd -tt /var/log/harbr/harbr
+          exec svlogd -tt /var/log/harbr/
         SCRIPT
     
     write_to_file("/etc/sv/harbr/run", run_script)
