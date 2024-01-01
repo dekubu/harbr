@@ -165,14 +165,18 @@ module Harbr
       if env == "next"
         write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
         write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
+        write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", finish_script
         `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
+        `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
         `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
       end
 
       if env == "current"
         write_to_file "/etc/sv/harbr/#{name}/run", run_script
         write_to_file "/etc/sv/harbr/#{name}/log/run", log_script
+        write_to_file "/etc/sv/harbr/#{name}/log/finish", finish_script
         `chmod +x /etc/sv/harbr/#{name}/run`
+        `chmod +x /etc/sv/harbr/#{name}/finish`
         `chmod +x /etc/sv/harbr/#{name}/log/run`
       end
 
