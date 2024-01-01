@@ -165,7 +165,7 @@ module Harbr
       if env == "next"
         write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
         write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
-        write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", finish_script
+        write_to_file "/etc/sv/harbr/#{name}/#{env}/log/finish", finish_script
         `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
         `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
         `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
@@ -228,8 +228,9 @@ module Harbr
       def finish_script
         <<~SCRIPT
           #!/bin/sh
-          sleep 3
-          `lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill`
+          sleep 1
+          lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
+          sleep 1
         SCRIPT
       end
 
