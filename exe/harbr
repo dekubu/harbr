@@ -32,6 +32,12 @@ class HarbrCLI < Thor
       system("command -v #{command} > /dev/null 2>&1")
     end
 
+    def write_to_file(path, contents)
+      dirname = File.dirname(path)
+      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
+      File.write(path, contents)
+    end
+
     def install_with_snap(package)
       puts "Installing #{package} using Snap..."
       system("sudo snap install #{package}") or raise "Failed to install #{package}"
@@ -175,6 +181,27 @@ class HarbrCLI < Thor
     install_with_snap("ruby") unless command_exists?("ruby")
     install_with_snap("traefik") unless command_exists?("traefik")
     install_with_apt("runit") unless command_exists?("runit")
+
+    run_script = <<~SCRIPT
+      #!/bin/sh
+      exec 2>&1
+      harbr monitor
+    SCRIPT
+
+    log_script = <<~SCRIPT
+          #!/bin/sh
+          exec svlogd -tt /var/log/harbr/harbr
+        SCRIPT
+    
+    write_to_file("/etc/sv/harbr/run", harbr_script)
+    write_to_file("/etc/sv/harbr/log/run", log_script)
+    
+    `chmod +x /etc/sv/harbr/run`
+    `chmod +x /etc/sv/harbr/log/run`
+    `mkdir -p /var/log/harbr`
+    `ln -sf /etc/sv/harbr /etc/service/harbr`
+    `sv start harbr`   
+    puts "Harbr service started successfully."
 
     puts "Setup completed successfully."
   end

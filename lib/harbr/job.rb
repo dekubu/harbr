@@ -62,7 +62,6 @@ module Harbr
     def write_to_file(path, contents)
       dirname = File.dirname(path)
       FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
-
       File.write(path, contents)
     end
 
