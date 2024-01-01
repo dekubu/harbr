@@ -19,9 +19,9 @@ module Harbr
   class Error < StandardError; end
 
   def self.send_notification(subject, body)
-    Resend.api_key = ENV["RESEND_API_KEY"]
-
     resend_config = YAML.load_file("/etc/harbr/resend.yml")
+
+    Resend.api_key = ENV["key"]
     
     params = {
       from: resend_config["from"],
