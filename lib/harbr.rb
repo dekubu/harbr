@@ -21,8 +21,8 @@ module Harbr
   def self.send_notification(subject, body)
     resend_config = YAML.load_file("/etc/harbr/resend.yml")
 
-    Resend.api_key = ENV["key"]
-    
+    Resend.api_key = resend_config["key"]
+
     params = {
       from: resend_config["from"],
       to: resend_config["to"],
