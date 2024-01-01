@@ -72,11 +72,11 @@ module Harbr
 
     def perform(name, version, env)
       Harbr.notifiable(name, version) do
+        version_path = "/var/harbr/containers/#{name}/versions/#{version}"
+        check_dir_exists(version_path)
+
         manifest = load_manifest(name, version)
         port = `port assign #{env}.#{manifest.port}`.strip
-
-        current_path = "/var/harbr/containers/#{name}/versions/#{version}"
-        check_dir_exists(current_path)
 
         process_container(name, version, port, env, manifest)
       end
@@ -98,10 +98,14 @@ module Harbr
     end
 
     def process_container(name, version, port, env, manifest)
-      env_path = "/var/harbr/containers/#{name}/#{env}"
-      system "sv stop #{env}.#{name}" if env == "next"
 
-      bundle_install_if_needed(env_path)
+      version_path = "/var/harbr/containers/#{name}/versions/#{version}"
+
+      system "sv stop #{env}.#{name}" if env == "next"
+      system "sv stop #{name}" if env == "current"
+
+      bundle_install_if_needed(version_path)
+
       create_runit_scripts(name, port, env)
       link_directories(name, version, env)
       sync_live_data_if_next(name) if env == "next"
