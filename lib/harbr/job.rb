@@ -170,7 +170,7 @@ module Harbr
       if env == "current"
       `rm -f /etc/service/#{name}`
       `rm -f /var/harbr/containers/#{name}`
-      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}`
+      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current`
       `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{name}`
       end
             
