@@ -115,11 +115,14 @@ module Harbr
       link_directories(name, version, env)
       sync_live_data_if_next(name) if env == "next"
 
-      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port)
+      containers = collate_containers("#{name}", "#{manifest.host}", port) if env == "current"
+      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port) if env == "next"
+
       create_traefik_config(containers)
 
       system "sv start #{env}.#{name}" if env == "next"
       system "sv start #{name}" if env == "current"
+      
 
 
       puts "harbr: #{version} of #{name} in #{env} environment"
@@ -139,19 +142,38 @@ module Harbr
       finish_script = Runit::Script.new(name, port, env).finish_script
       log_script = Runit::Script.new(name, port, env).log_script
 
-      write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
-      write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
+      if env == "next"
+        write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
+        write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
+        `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
+        `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
+      end
 
-      `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
-      `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
+      if env == "current"
+        write_to_file "/etc/sv/harbr/#{name}/run", run_script
+        write_to_file "/etc/sv/harbr/#{name}/log/run", log_script
+        `chmod +x /etc/sv/harbr/#{name}/run`
+        `chmod +x /etc/sv/harbr/#{name}/log/run`
+      end
+
+      
     end
 
     def link_directories(name, version, env)
+      if env == "next"
       `rm -f /etc/service/#{env}.#{name}`
       `rm -f /var/harbr/containers/#{name}/#{env}`
-
       `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/#{env}`
       `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{env}.#{name}`
+      end
+
+      if env == "current"
+      `rm -f /etc/service/#{name}`
+      `rm -f /var/harbr/containers/#{name}`
+      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}`
+      `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{name}`
+      end
+            
     end
 
     def sync_live_data_if_next(name)
