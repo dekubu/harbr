@@ -21,15 +21,17 @@ module Harbr
   def self.send_notification(subject, body)
     Resend.api_key = ENV["RESEND_API_KEY"]
 
+    resend_config = YAML.load_file("/etc/harbr/resend.yml")
+    
     params = {
-      from: ENV["RESEND_FROM"],
-      to: ENV["RESEND_TO"],
+      from: resend_config["from"],
+      to: resend_config["to"],
       subject: subject,
       html: body
     }
 
     puts "Sending notification: #{params}"
-    
+
     Resend::Emails.send(params)
   rescue => e
     puts "Error: #{e.class}"

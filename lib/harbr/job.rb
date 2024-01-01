@@ -123,9 +123,6 @@ module Harbr
 
       version_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
-      #system "sv stop #{env}.#{name}" if env == "next"
-      #system "sv stop #{name}" if env == "current"
-
       bundle_install_if_needed(version_path)
 
       create_runit_scripts(name, port, env)
