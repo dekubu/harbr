@@ -30,6 +30,8 @@ module Harbr
 
     Resend::Emails.send(params)
   rescue => e
+    puts "Error: #{e.class}"
+    puts "backtrace: #{e.backtrace.join('\n')}"
     puts "Error sending notification: #{e.message}"
   end
 
