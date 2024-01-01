@@ -102,6 +102,23 @@ module Harbr
       end
     end
 
+    def check_dir_exists(path)
+      sleep_times = [1, 3, 5, 8, 23]
+      begin
+        sleep_times.each do |time|
+          puts "checking #{path}...."
+          if Dir.exist?(path)
+            puts "found #{path}"
+            return
+          end
+          sleep(time)
+        end
+        raise "Directory not found: #{path}"
+      rescue => e
+        puts "Error: #{e.message}"
+      end
+    end
+
     def process_container(name, version, port, env, manifest)
 
       version_path = "/var/harbr/containers/#{name}/versions/#{version}"
@@ -129,6 +146,9 @@ module Harbr
     end
 
     def bundle_install_if_needed(path)
+      
+      check_dir_exists(path)
+
       Dir.chdir(path) do
         if File.exist?("Gemfile")
           `bundle config set --local path 'vendor/bundle'`
