@@ -187,17 +187,15 @@ class HarbrCLI < Thor
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
-    
-    Dir.chdir("/var/harbr/containers/#{name}/") do
-      /(?:. * -> (?:.*))/ =~ `ls -l /var/harbr/containers/#{name}/next`
-      version = $2      
-    end
-        
+    /versions\/(?<version>\d*)/.match(`ls -l /var/harbr/containers/#{name}/next`)
+    version = $1
+    raise "Ooops! next version not found!" if version.nil?
+
     Harbr::Job.perform_async(name, version, "current")
-    puts "deploy current version #{version} of #{container}"
+    puts "deploy current version #{version} of #{name}"
 
   end
-
+  
   desc "rollback", "rollback last deploy"
   def rollback(name)
     Dir.chdir("/var/harbr/containers/#{name}") do
