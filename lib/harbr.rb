@@ -28,6 +28,8 @@ module Harbr
       html: body
     }
 
+    puts "Sending notification: #{params}"
+    
     Resend::Emails.send(params)
   rescue => e
     puts "Error: #{e.class}"
