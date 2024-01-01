@@ -190,13 +190,9 @@ class HarbrCLI < Thor
     /versions\/(?<version>\d*)/.match(`ls -l /var/harbr/containers/#{name}/next`)
     version = $1
     raise "Ooops! next version not found!" if version.nil?
-
-
+    
     /versions\/(?<version>\d*)/.match(`ls -l /var/harbr/containers/#{name}/current`)
     `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
-
-
-    `rm -rf /var/harbr/containers/#{name}/current`
 
     Harbr::Job.perform_async(name, version, "current")
 
