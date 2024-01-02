@@ -42,22 +42,29 @@ module Harbr
     def collate_containers(name, host, port, host_header_aliases = [])
       containers = Harbr::Container::Repository.new
       container = containers.find_by_header(host)
-      
-      host_header_aliases << host
-
+  
       if container.nil?
-        host_header_aliases.each do |host_header_alias|
-          container = Harbr::Container.new
-          container.name = name
-          container.host_header = host_header_alias
-          container.ip = "127.0.0.1"
-          container.port = port
-          containers.create(container)
-        end
+        container = Harbr::Container.new
+        container.name = name
+        container.host_header = host
+        container.ip = "127.0.0.1"
+        container.port = port
+        containers.create(container)
+        
       else
         container.port = port
         containers.update(container)
       end
+
+      host_header_aliases.each do |host_header_alias|
+        container = Harbr::Container.new
+        container.name = "#{name} -> #{host_header_alias}"
+        container.host_header = host_header_alias
+        container.ip = "127.0.0.1"
+        container.port = port
+        containers.create(container) unless containers.find_by_header(host_header_alias)
+      end
+
 
       containers.all
     end
