@@ -39,17 +39,21 @@ module Harbr
       puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
 
-    def collate_containers(name, host, port)
+    def collate_containers(name, host, port, host_header_aliases = [])
       containers = Harbr::Container::Repository.new
       container = containers.find_by_header(host)
+      
+      host_header_aliases << host
 
       if container.nil?
-        container = Harbr::Container.new
-        container.name = name
-        container.host_header = host
-        container.ip = "127.0.0.1"
-        container.port = port
-        containers.create(container)
+        host_header_aliases.each do |host_header_alias|
+          container = Harbr::Container.new
+          container.name = name
+          container.host_header = host_header_alias
+          container.ip = "127.0.0.1"
+          container.port = port
+          containers.create(container)
+        end
       else
         container.port = port
         containers.update(container)
