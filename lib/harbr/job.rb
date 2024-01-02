@@ -132,8 +132,8 @@ module Harbr
       link_directories(name, version, env)
       sync_live_data_if_next(name) if env == "next"
 
-      containers = collate_containers("#{name}", "#{manifest.host}", port) if env == "current"
-      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port) if env == "next"
+      containers = collate_containers("#{name}", "#{manifest.host}", port,manifest.host_header_alias) if env == "current"
+      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port,manifest.host_header_alias.map{|host| "#{env}.#{host}"  }) if env == "next"
 
       create_traefik_config(containers)
 
