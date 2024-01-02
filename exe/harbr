@@ -134,12 +134,12 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
 
     [name, "next.#{name}"].each do |container_name|
-      container = container_repo.find_by_name(container_name)
-      if container
+      container_repo.get_by_name(container_name).each do |container|
         `port release #{container.port}`
         puts "released port #{container.port} successfully."
         container_repo.delete(container)
       end
+    end
 
       `rm -rf /etc/service/#{container_name}`
       `rm -rf /etc/sv/harbr/#{container_name}`
