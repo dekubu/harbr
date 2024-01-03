@@ -56,7 +56,7 @@ module Harbr
         containers.update(container)
       end
 
-      if host_header_alias
+      if host_header_aliases
         host_header_aliases.each do |host_header_alias|
           container = Harbr::Container.new
           container.name = "#{name} -> #{host_header_alias}"
