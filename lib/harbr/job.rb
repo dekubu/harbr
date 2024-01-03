@@ -42,7 +42,7 @@ module Harbr
     def collate_containers(name, host, port, host_header_aliases = [])
       containers = Harbr::Container::Repository.new
       container = containers.find_by_header(host)
-  
+
       if container.nil?
         container = Harbr::Container.new
         container.name = name
@@ -50,21 +50,22 @@ module Harbr
         container.ip = "127.0.0.1"
         container.port = port
         containers.create(container)
-        
+
       else
         container.port = port
         containers.update(container)
       end
 
-      host_header_aliases.each do |host_header_alias|
-        container = Harbr::Container.new
-        container.name = "#{name} -> #{host_header_alias}"
-        container.host_header = host_header_alias
-        container.ip = "127.0.0.1"
-        container.port = port
-        containers.create(container) unless containers.find_by_header(host_header_alias)
+      if host_header_alias
+        host_header_aliases.each do |host_header_alias|
+          container = Harbr::Container.new
+          container.name = "#{name} -> #{host_header_alias}"
+          container.host_header = host_header_alias
+          container.ip = "127.0.0.1"
+          container.port = port
+          containers.create(container) unless containers.find_by_header(host_header_alias)
+        end
       end
-
 
       containers.all
     end
@@ -146,14 +147,14 @@ module Harbr
 
       system "sv restart #{env}.#{name}" if env == "next"
       system "sv restart #{name}" if env == "current"
-      
+
 
 
       puts "harbr: #{version} of #{name} in #{env} environment"
     end
 
     def bundle_install_if_needed(path)
-      
+
       check_dir_exists(path)
 
       Dir.chdir(path) do
@@ -190,26 +191,26 @@ module Harbr
 
       end
 
-      
+
     end
 
     def link_directories(name, version, env)
       if env == "next"
-      `rm -f /etc/service/#{env}.#{name}`
-      `rm -f /var/harbr/containers/#{name}/#{env}`
-      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/#{env}`
-      `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{env}.#{name}`
+        `rm -f /etc/service/#{env}.#{name}`
+        `rm -f /var/harbr/containers/#{name}/#{env}`
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/#{env}`
+        `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{env}.#{name}`
       end
 
       if env == "current"
-      
-      `rm -f /etc/service/#{name}`
-      `rm -f /var/harbr/containers/#{name}/current`
 
-      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current`
-      `ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}`
+        `rm -f /etc/service/#{name}`
+        `rm -f /var/harbr/containers/#{name}/current`
+
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current`
+        `ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}`
       end
-            
+
     end
 
     def sync_live_data_if_next(name)
@@ -228,27 +229,27 @@ module Harbr
 
       def run_script
         <<~SCRIPT
-          #!/bin/sh
-          exec 2>&1
-          cd /var/harbr/containers/#{@container_name}/#{@env}
-          exec ./exe/run #{@port} #{@env}
-          echo "started #{@container_name} on port #{@port}"
+        #!/bin/sh
+        exec 2>&1
+        cd /var/harbr/containers/#{@container_name}/#{@env}
+        exec ./exe/run #{@port} #{@env}
+        echo "started #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def finish_script
         <<~SCRIPT
-          #!/bin/sh
-          lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
-          echo "killed #{@container_name} on port #{@port}"
+        #!/bin/sh
+        lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
+        echo "killed #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def log_script
         <<~SCRIPT
-          #!/bin/sh
-          echo "starting log for #{@container_name} on port #{@port}"
-          exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}/
+        #!/bin/sh
+        echo "starting log for #{@container_name} on port #{@port}"
+        exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}/
         SCRIPT
       end
     end
