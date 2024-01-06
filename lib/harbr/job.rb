@@ -117,7 +117,7 @@ module Harbr
     private
 
     def remove_dot_from_string(str)
-      str.gsub('.', '')
+      str.sub('.', '')
     end
 
     def check_file_exists(path)
