@@ -68,16 +68,19 @@ module Harbr
           containers.create(container) unless containers.find_by_header(host_header_alias)
 
           if(container.name.start_with?("live"))
+
+            plain_name = host_header_alias.gsub("live.","")
             container = Harbr::Container.new
-            container.name = "#{name} -> #{host_header_alias.gsub("live","")}"
-            container.host_header = host_header_alias.gsub("live","")
+            container.name = "#{name} -> #{plain_name}"
+            container.host_header = plain_name
             container.ip = "127.0.0.1"
             container.port = port 
+            
 
-            unless containers.find_by_header(host_header_alias.gsub("live",""))
+            unless containers.find_by_header(plain_name)
               containers.create(container)
             end
-            
+
           end
 
         end
