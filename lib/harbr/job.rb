@@ -220,7 +220,7 @@ module Harbr
         <<~SCRIPT
           #!/bin/sh
           echo "starting log for #{@container_name} on port #{@port}"
-          exec svlogd -tt /var/log/harbr/#{@container_name}/#{env}
+          exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}
         SCRIPT
       end
     end
