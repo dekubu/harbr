@@ -72,12 +72,12 @@ module Harbr
             plain_name = host_header_alias.gsub("live.","")
             container = Harbr::Container.new
             container.name = "#{name} -> #{plain_name}"
-            container.host_header = plain_name
+            container.host_header = remove_dot_from_string(plain_name)
             container.ip = "127.0.0.1"
             container.port = port 
-            
 
-            unless containers.find_by_header(plain_name)
+
+            unless containers.find_by_header(container.host_header)
               containers.create(container)
             end
 
@@ -88,6 +88,8 @@ module Harbr
 
       containers.all
     end
+
+
 
     def write_to_file(path, contents)
       dirname = File.dirname(path)
@@ -113,6 +115,10 @@ module Harbr
     end
 
     private
+
+    def remove_dot_from_string(str)
+      str.gsub('.', '')
+    end
 
     def check_file_exists(path)
       sleep_times = [1, 3, 5, 8, 23]
