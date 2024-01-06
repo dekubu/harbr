@@ -72,7 +72,7 @@ module Harbr
             plain_name = host_header_alias.gsub("live.","")
             container = Harbr::Container.new
             container.name = "#{name} -> #{plain_name}"
-            container.host_header = remove_dot_from_string(plain_name)
+            container.host_header = plain_name
             container.ip = "127.0.0.1"
             container.port = port 
 
