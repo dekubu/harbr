@@ -138,15 +138,13 @@ module Harbr
       link_directories(name, version, env)
       sync_live_data_if_next(name) if env == "next"
 
-      containers = collate_containers("#{name}", "#{manifest.host}", port, manifest.host_aliases) if env == "current"
-      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port, manifest.host_aliases&.map { |host| "#{env}.#{host}" }) if env == "next"
+      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port, manifest.host_aliases&.map { |host| "#{env}.#{host}" })
 
       create_traefik_config(containers)
 
-      system "sv restart #{env}.#{name}" if env == "next"
-      system "sv restart #{name}" if env == "current"
+      system "sv restart #{env}.#{name}"
 
-      puts "harbr: #{version} of #{name} in #{env} environment"
+      puts "harbr: #{version} of #{name} deployed to #{env} environment"
     end
 
     def bundle_install_if_needed(path)
@@ -165,44 +163,20 @@ module Harbr
       finish_script = Runit::Script.new(name, port, env).finish_script
       log_script = Runit::Script.new(name, port, env).log_script
 
-      if env == "next"
-        write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
-        write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
-        write_to_file "/etc/sv/harbr/#{name}/#{env}/finish", finish_script
-        `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
-        `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
-        `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
-        `mkdir -p /var/log/harbr/#{name}/#{env}`
-      end
-
-      if env == "current"
-        write_to_file "/etc/sv/harbr/#{name}/run", run_script
-        write_to_file "/etc/sv/harbr/#{name}/log/run", log_script
-        write_to_file "/etc/sv/harbr/#{name}/finish", finish_script
-        `chmod +x /etc/sv/harbr/#{name}/run`
-        `chmod +x /etc/sv/harbr/#{name}/finish`
-        `chmod +x /etc/sv/harbr/#{name}/log/run`
-        `mkdir -p /var/log/harbr/#{name}`
-
-      end
+      write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
+      write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
+      write_to_file "/etc/sv/harbr/#{name}/#{env}/finish", finish_script
+      `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
+      `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
+      `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
+      `mkdir -p /var/log/harbr/#{name}/#{env}`
     end
 
     def link_directories(name, version, env)
-      if env == "next"
-        `rm -f /etc/service/#{env}.#{name}`
-        `rm -f /var/harbr/containers/#{name}/#{env}`
-        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/#{env}`
-        `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{env}.#{name}`
-      end
-
-      if env == "current"
-
-        `rm -f /etc/service/#{name}`
-        `rm -f /var/harbr/containers/#{name}/current`
-
-        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current`
-        `ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}`
-      end
+      `rm -f /etc/service/#{env}.#{name}`
+      `rm -f /var/harbr/containers/#{name}/#{env}`
+      `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/#{env}`
+      `ln -sf /etc/sv/harbr/#{name}/#{env} /etc/service/#{env}.#{name}`
     end
 
     def sync_live_data_if_next(name)
@@ -238,7 +212,6 @@ module Harbr
       end
 
       def log_script
-        env = @env == 'current' ? nil : @env
         <<~SCRIPT
           #!/bin/sh
           echo "starting log for #{@container_name} on port #{@port}"

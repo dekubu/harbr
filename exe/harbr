@@ -133,7 +133,8 @@ class HarbrCLI < Thor
 
     container_repo = Harbr::Container::Repository.new
 
-    [name, "next.#{name}"].each do |container_name|
+    ["live.#{name}", "next.#{name}"].each do |container_name|
+      
       container_repo.get_by_name(container_name).each do |container|
         `port release #{container.port}`
         puts "released port #{container.port} successfully."
@@ -164,7 +165,7 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
     container = container_repo.find_by_name(container)
     if container
-      exec "tail -f /var/log/harbr/#{container.name}/current" if options[:live]
+      exec "tail -f /var/log/harbr/#{container.name}/live/current" if options[:live]
       exec "tail -f /var/log/harbr/#{container.name}/next/current" if options[:next]
     else
       puts "Container not recognized"
@@ -217,12 +218,12 @@ class HarbrCLI < Thor
     version = $1
     raise "Ooops! next version not found!" if version.nil?
 
-    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/current`
+    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/live`
     `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
 
-    Harbr::Job.perform_async(name, version, "current")
+    Harbr::Job.perform_async(name, version, "live")
 
-    puts "deploy current version #{version} of #{name}"
+    puts "deploy version #{version} of #{name} to live environment"
   end
 
   desc "rollback", "rollback last deploy"
@@ -231,9 +232,9 @@ class HarbrCLI < Thor
       if File.exist?("rollback")
         Dir.chdir("/var/harbr/containers/#{name}/") do
           /(?:. * -> (?:.*))/ =~ `ls -l /var/harbr/containers/#{name}/rollback`
-          `rm -r current`
-          `ln -sf #{$2} current`
-          `sv restart #{name}`
+          `rm -r live`
+          `ln -sf #{$2} live`
+          `sv restart live.#{name}`
         end
         puts "rollback successful"
       end
