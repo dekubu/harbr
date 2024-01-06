@@ -73,7 +73,11 @@ module Harbr
             container.host_header = host_header_alias.gsub("live","")
             container.ip = "127.0.0.1"
             container.port = port 
-            containers.create(container) unless containers.find_by_header(host_header_alias)
+
+            unless containers.find_by_header(host_header_alias.gsub("live",""))
+              containers.create(container)
+            end
+            
           end
 
         end
