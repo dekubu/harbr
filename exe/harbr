@@ -133,7 +133,7 @@ class HarbrCLI < Thor
 
     container_repo = Harbr::Container::Repository.new
 
-    ["live.#{name}", "next.#{name}"].each do |container_name|
+    ["live.#{name}", "next.#{name}", name].each do |container_name|
       
       container_repo.get_by_name(container_name).each do |container|
         `port release #{container.port}`
