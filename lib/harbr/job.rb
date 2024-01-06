@@ -132,6 +132,11 @@ module Harbr
     def process_container(name, version, port, env, manifest)
       version_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
+      if env == "live"
+        `rm -f /var/harbr/containers/#{name}/live` if Dir.exist?("/var/harbr/containers/#{name}/live")
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/live`                
+      end
+      
       bundle_install_if_needed(version_path)
 
       create_runit_scripts(name, port, env)
