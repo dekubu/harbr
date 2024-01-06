@@ -238,11 +238,11 @@ module Harbr
       end
 
       def log_script
-        @env = env == 'current' ? nil : env
+        env = @env == 'current' ? nil : @env
         <<~SCRIPT
           #!/bin/sh
           echo "starting log for #{@container_name} on port #{@port}"
-          exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}
+          exec svlogd -tt /var/log/harbr/#{@container_name}/#{env}
         SCRIPT
       end
     end
