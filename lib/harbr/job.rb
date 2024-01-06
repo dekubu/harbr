@@ -42,7 +42,7 @@ module Harbr
     def collate_containers(name, host, port, host_header_aliases = [])
       containers = Harbr::Container::Repository.new
       container = containers.find_by_header(host)
-
+      
       if container.nil?
         container = Harbr::Container.new
         container.name = name
@@ -56,14 +56,26 @@ module Harbr
         containers.update(container)
       end
 
+      
       if host_header_aliases
         host_header_aliases.each do |host_header_alias|
+          
           container = Harbr::Container.new
           container.name = "#{name} -> #{host_header_alias}"
           container.host_header = host_header_alias
           container.ip = "127.0.0.1"
           container.port = port
           containers.create(container) unless containers.find_by_header(host_header_alias)
+
+          if(container.name.starts_with?("live"))
+            container = Harbr::Container.new
+            container.name = "#{name} -> #{host_header_alias.gsub("live","")}"
+            container.host_header = host_header_alias.gsub("live","")
+            container.ip = "127.0.0.1"
+            container.port = port 
+            containers.create(container) unless containers.find_by_header(host_header_alias)
+          end
+                      
         end
       end
 
