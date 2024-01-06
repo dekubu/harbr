@@ -70,7 +70,6 @@ module Harbr
       containers.all
     end
 
-
     def write_to_file(path, contents)
       dirname = File.dirname(path)
       FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
@@ -87,10 +86,10 @@ module Harbr
     end
 
     def perform(name, version, env)
-      Harbr.notifiable(name, version,env) do
+      Harbr.notifiable(name, version, env) do
         manifest = load_manifest(name, version)
         port = `port assign #{env}.#{manifest.port}`.strip
-        process_container(name,version,port,env,manifest)
+        process_container(name, version, port, env, manifest)
       end
     end
 
@@ -131,7 +130,6 @@ module Harbr
     end
 
     def process_container(name, version, port, env, manifest)
-
       version_path = "/var/harbr/containers/#{name}/versions/#{version}"
 
       bundle_install_if_needed(version_path)
@@ -140,21 +138,18 @@ module Harbr
       link_directories(name, version, env)
       sync_live_data_if_next(name) if env == "next"
 
-      containers = collate_containers("#{name}", "#{manifest.host}", port,manifest.host_aliases) if env == "current"
-      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port,manifest.host_aliases&.map{|host| "#{env}.#{host}"  }) if env == "next"
+      containers = collate_containers("#{name}", "#{manifest.host}", port, manifest.host_aliases) if env == "current"
+      containers = collate_containers("#{env}.#{name}", "#{env}.#{manifest.host}", port, manifest.host_aliases&.map { |host| "#{env}.#{host}" }) if env == "next"
 
       create_traefik_config(containers)
 
       system "sv restart #{env}.#{name}" if env == "next"
       system "sv restart #{name}" if env == "current"
 
-
-
       puts "harbr: #{version} of #{name} in #{env} environment"
     end
 
     def bundle_install_if_needed(path)
-
       check_dir_exists(path)
 
       Dir.chdir(path) do
@@ -190,8 +185,6 @@ module Harbr
         `mkdir -p /var/log/harbr/#{name}`
 
       end
-
-
     end
 
     def link_directories(name, version, env)
@@ -210,7 +203,6 @@ module Harbr
         `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/current`
         `ln -sf /etc/sv/harbr/#{name} /etc/service/#{name}`
       end
-
     end
 
     def sync_live_data_if_next(name)
@@ -224,32 +216,32 @@ module Harbr
       def initialize(container, port, env)
         @container_name = container
         @port = port
-        @env = env
+        @env = env == 'current' ? nil : env
       end
 
       def run_script
         <<~SCRIPT
-        #!/bin/sh
-        exec 2>&1
-        cd /var/harbr/containers/#{@container_name}/#{@env}
-        exec ./exe/run #{@port} #{@env}
-        echo "started #{@container_name} on port #{@port}"
+          #!/bin/sh
+          exec 2>&1
+          cd /var/harbr/containers/#{@container_name}/#{@env}
+          exec ./exe/run #{@port} #{@env}
+          echo "started #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def finish_script
         <<~SCRIPT
-        #!/bin/sh
-        lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
-        echo "killed #{@container_name} on port #{@port}"
+          #!/bin/sh
+          lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
+          echo "killed #{@container_name} on port #{@port}"
         SCRIPT
       end
 
       def log_script
         <<~SCRIPT
-        #!/bin/sh
-        echo "starting log for #{@container_name} on port #{@port}"
-        exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}/
+          #!/bin/sh
+          echo "starting log for #{@container_name} on port #{@port}"
+          exec svlogd -tt /var/log/harbr/#{@container_name}/#{@env}
         SCRIPT
       end
     end

@@ -134,7 +134,6 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
 
     [name, "next.#{name}"].each do |container_name|
-      
       container_repo.get_by_name(container_name).each do |container|
         `port release #{container.port}`
         puts "released port #{container.port} successfully."
@@ -189,18 +188,18 @@ class HarbrCLI < Thor
     SCRIPT
 
     log_script = <<~SCRIPT
-          #!/bin/sh
-          exec svlogd -tt /var/log/harbr/
-        SCRIPT
-    
+      #!/bin/sh
+      exec svlogd -tt /var/log/harbr/
+    SCRIPT
+
     write_to_file("/etc/sv/harbr/run", run_script)
     write_to_file("/etc/sv/harbr/log/run", log_script)
-    
+
     `chmod +x /etc/sv/harbr/run`
     `chmod +x /etc/sv/harbr/log/run`
     `mkdir -p /var/log/harbr`
     `ln -sf /etc/sv/harbr /etc/service/harbr`
-    `sv start harbr`   
+    `sv start harbr`
     puts "Harbr service started successfully."
 
     puts "Setup completed successfully."
@@ -214,20 +213,18 @@ class HarbrCLI < Thor
 
   desc "deploy", "deploy a container to production"
   def deploy(name)
-    /versions\/(?<version>\d*)/.match(`ls -l /var/harbr/containers/#{name}/next`)
+    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/next`
     version = $1
     raise "Ooops! next version not found!" if version.nil?
-    
-    /versions\/(?<version>\d*)/.match(`ls -l /var/harbr/containers/#{name}/current`)
+
+    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/current`
     `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
 
     Harbr::Job.perform_async(name, version, "current")
 
     puts "deploy current version #{version} of #{name}"
-
   end
 
-  
   desc "rollback", "rollback last deploy"
   def rollback(name)
     Dir.chdir("/var/harbr/containers/#{name}") do

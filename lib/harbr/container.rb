@@ -11,6 +11,7 @@ module Harbr
       def find_by_name(name)
         all.find { |container| container.name.downcase == name.downcase }
       end
+
       def get_by_name(name)
         all.select { |container| container.name.downcase.include? name.downcase }
       end

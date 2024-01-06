@@ -39,15 +39,15 @@ module Harbr
     puts "Error sending notification: #{e.message}"
   end
 
-  def self.notifiable(name, version,env)
+  def self.notifiable(name, version, env)
     yield if block_given?
     env = "live" if env == "current"
     send_notification("Harbr: #{name} deployed to #{env} successfully", "<p>harbr: #{version} of #{name} deployed to #{env} successfully</p>")
   rescue => e
     html_content = <<~HTML
-    <p>Error: #{e.message}</p>
-              <p>#{e.backtrace.join("<br>")}</p>
-              <p>harbr: #{version} of #{env} #{name} failed to deploy</p>
+      <p>Error: #{e.message}</p>
+                <p>#{e.backtrace.join("<br>")}</p>
+                <p>harbr: #{version} of #{env} #{name} failed to deploy</p>
     HTML
 
     send_notification("Harbr: #{name} failed to deploy", html_content)
