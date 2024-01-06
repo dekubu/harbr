@@ -137,6 +137,11 @@ module Harbr
         `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/live`                
       end
       
+      if env == "next"
+        `rm -f /var/harbr/containers/#{name}/next` if Dir.exist?("/var/harbr/containers/#{name}/next")
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next`                
+      end
+      
       bundle_install_if_needed(version_path)
 
       create_runit_scripts(name, port, env)
