@@ -216,7 +216,7 @@ module Harbr
       def initialize(container, port, env)
         @container_name = container
         @port = port
-        @env = env == 'current' ? nil : env
+        @env = env
       end
 
       def run_script
@@ -238,6 +238,7 @@ module Harbr
       end
 
       def log_script
+        @env = env == 'current' ? nil : env
         <<~SCRIPT
           #!/bin/sh
           echo "starting log for #{@container_name} on port #{@port}"
