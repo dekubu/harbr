@@ -67,7 +67,7 @@ module Harbr
           container.port = port
           containers.create(container) unless containers.find_by_header(host_header_alias)
 
-          if(container.name.starts_with?("live"))
+          if(container.name.start_with?("live"))
             container = Harbr::Container.new
             container.name = "#{name} -> #{host_header_alias.gsub("live","")}"
             container.host_header = host_header_alias.gsub("live","")
@@ -75,7 +75,7 @@ module Harbr
             container.port = port 
             containers.create(container) unless containers.find_by_header(host_header_alias)
           end
-                      
+
         end
       end
 
