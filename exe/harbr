@@ -137,9 +137,8 @@ class HarbrCLI < Thor
     install_with_apt("runit") unless command_exists?("runit")
     install_with_apt("lxc") unless command_exists?("lxc")
 
-    Harbr::Lxd::Setup.perform("panamax")
-    
-    
+    Harbr::Lxd::Setup.new.perform("panamax")
+        
     puts "Setup completed successfully."
   end
 
