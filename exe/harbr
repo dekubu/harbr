@@ -155,7 +155,7 @@ class HarbrCLI < Thor
 
   desc "update", "update to the latest version of harbr"
   def update
-    system "gem update harbr && sv stop harbr && sv start harbr"
+    system "gem update harbr"
   end
 
 end
