@@ -56,7 +56,7 @@ module Harbr
         raise "Source path #{source_path} does not exist." unless File.directory?(source_path)
 
         # Create the container
-        system("lxc launch ubuntu:20.04 #{name}")
+        system("lxc launch panamax #{name}")
         sleep(5) # Wait for the container to initialize
 
         # Check if runit is installed, if not then install
