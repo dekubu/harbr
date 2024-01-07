@@ -48,6 +48,39 @@ class HarbrCLI < Thor
       system("sudo apt install #{package}") or raise "Failed to install #{package}"
     end
 
+    def create_traefik_config(containers)
+      config = {
+        "http" => {
+          "routers" => {},
+          "services" => {}
+        }
+      }
+
+      containers.each do |container|
+        container.ip = "127.0.0.1"
+        name = container.name.tr(".", "-")
+
+        router_key = "#{name}-router-secure"
+        config["http"]["routers"][router_key] = {
+          "rule" => "Host(`#{container.host_header}`)",
+          "service" => "#{name}-service",
+          "entryPoints" => ["https"],
+          "tls" => {
+            "certResolver" => "myresolver"
+          }
+        }
+
+        config["http"]["services"]["#{name}-service"] = {
+          "loadBalancer" => {
+            "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
+          }
+        }
+      end
+
+      File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
+      puts "Traefik configuration written to /etc/traefik/harbr.toml"
+    end
+
   end
 
   desc "destroy", "Destroy a container and remove all traces"
