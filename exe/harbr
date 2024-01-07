@@ -86,9 +86,10 @@ class HarbrCLI < Thor
         puts "Error: #{e.message}"
       end
     end
-
     def run_jobs(container, version)
-      `harbr deploy #{container} #{version} --next`
+      check_file_exists("/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml") do
+        `harbr deploy #{container} #{version} --next`
+      end
     end
 
     def create_traefik_config(containers)
