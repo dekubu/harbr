@@ -11,6 +11,8 @@ require "resend"
 require_relative "harbr/version"
 require_relative "harbr/container"
 require_relative "harbr/job"
+require_relative "harbr/lxd/job"
+
 
 # Harbr module for managing containers, jobs, ports, and 2s
 module Harbr
