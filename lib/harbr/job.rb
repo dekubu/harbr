@@ -194,9 +194,9 @@ module Harbr
 
       write_to_file "/etc/sv/harbr/#{name}/#{env}/run", run_script
       write_to_file "/etc/sv/harbr/#{name}/#{env}/log/run", log_script
-      write_to_file "/etc/sv/harbr/#{name}/#{env}/finish", finish_script
+      #write_to_file "/etc/sv/harbr/#{name}/#{env}/finish", finish_script
       `chmod +x /etc/sv/harbr/#{name}/#{env}/run`
-      `chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
+      #`chmod +x /etc/sv/harbr/#{name}/#{env}/finish`
       `chmod +x /etc/sv/harbr/#{name}/#{env}/log/run`
       `mkdir -p /var/log/harbr/#{name}/#{env}`
     end
@@ -232,13 +232,13 @@ module Harbr
         SCRIPT
       end
 
-      def finish_script
-        <<~SCRIPT
-          #!/bin/sh
-          lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
-          echo "killed #{@container_name} on port #{@port}"
-        SCRIPT
-      end
+      # def finish_script
+      #   <<~SCRIPT
+      #     #!/bin/sh
+      #     lsof -i :#{@port} | awk 'NR!=1 {print $2}' | xargs kill
+      #     echo "killed #{@container_name} on port #{@port}"
+      #   SCRIPT
+      # end
 
       def log_script
         <<~SCRIPT
