@@ -20,7 +20,7 @@ module Harbr
   Dddr.configure do |config|
     config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
   end
-  
+
   class Error < StandardError; end
 
   def self.send_notification(subject, body)

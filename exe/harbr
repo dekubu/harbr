@@ -80,7 +80,6 @@ class HarbrCLI < Thor
       File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
       puts "Traefik configuration written to /etc/traefik/harbr.toml"
     end
-
   end
 
   desc "destroy", "Destroy a container and remove all traces"
@@ -148,8 +147,7 @@ class HarbrCLI < Thor
   desc "deploy", "deploy a container to production"
   method_option :live, type: :boolean, default: false, aliases: "-l", desc: "deploy to live environment"
   method_option :next, type: :boolean, default: false, aliases: "-n", desc: "deploy to next environment"
-  def deploy(name,version=nil)
-    
+  def deploy(name, version = nil)
     if options[:live]
       /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/next`
       version = $1
@@ -166,10 +164,34 @@ class HarbrCLI < Thor
     if options[:next]
       `ln -sf /var/harbr/containers/#{name}/version/#{version} /var/harbr/containers/#{name}/next`
       Harbr::Job.perform_async(name, version, "next")
-      puts "deploy version #{version} of #{name} to next environment"      
+      puts "deploy version #{version} of #{name} to next environment"
     end
-      
   end
+
+  desc "containerise", "deploy a container to a lxd comtainer"
+  method_option :live, type: :boolean, default: false, aliases: "-l", desc: "deploy to live environment"
+  method_option :next, type: :boolean, default: false, aliases: "-n", desc: "deploy to next environment"
+  def containerise(name, version = nil)
+    if options[:live]
+      /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/next`
+      version = $1
+      raise "Ooops! next version not found!" if version.nil?
+
+      Harbr::Lxd::Job.perform_async(name, 9292, "live")
+
+      /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/live`
+      `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
+
+      puts "deploy version #{version} of #{name} to live environment"
+    end
+
+    if options[:next]
+      `ln -sf /var/harbr/containers/#{name}/version/#{version} /var/harbr/containers/#{name}/next`
+      Harbr::Joarbr::Lxd::Job.perform_async(name, 9292, "next")
+      puts "deploy version #{version} of #{name} to next environment"
+    end
+  end
+
 
   desc "rollback", "rollback last deploy"
   def rollback(name)
@@ -190,7 +212,6 @@ class HarbrCLI < Thor
   def update
     system "gem update harbr"
   end
-
 end
 
 HarbrCLI.start(ARGV)
