@@ -16,6 +16,11 @@ require_relative "harbr/job"
 module Harbr
   DEFAULT_DIRECTORY = "/var/harbr/containers"
   DEFAULT_DIRECTORY_DATA_DIR = "#{DEFAULT_DIRECTORY}/.data"
+
+  Dddr.configure do |config|
+    config.data_dir = DEFAULT_DIRECTORY_DATA_DIR
+  end
+  
   class Error < StandardError; end
 
   def self.send_notification(subject, body)
