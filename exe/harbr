@@ -177,7 +177,7 @@ class HarbrCLI < Thor
       version = $1
       raise "Ooops! next version not found!" if version.nil?
 
-      Harbr::Lxd::Job.perform_async(name, 9292, "live")
+      Harbr::Lxd::Job.perform_async(name,version, "live",9292)
 
       /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/live`
       `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
@@ -187,7 +187,7 @@ class HarbrCLI < Thor
 
     if options[:next]
       `ln -sf /var/harbr/containers/#{name}/version/#{version} /var/harbr/containers/#{name}/next`
-      Harbr::Lxd::Job.perform_async(name, 9292, "next")
+      Harbr::Lxd::Job.perform_async(name,version,"next",9292)
       puts "deploy version #{version} of #{name} to next environment"
     end
   end
