@@ -135,6 +135,11 @@ class HarbrCLI < Thor
     install_with_snap("ruby") unless command_exists?("ruby")
     install_with_snap("traefik") unless command_exists?("traefik")
     install_with_apt("runit") unless command_exists?("runit")
+    install_with_apt("lxc") unless command_exists?("lxc")
+
+    Harbr::Lxd::Setup.perform("panamax")
+    
+    
     puts "Setup completed successfully."
   end
 
