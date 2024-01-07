@@ -48,82 +48,6 @@ class HarbrCLI < Thor
       system("sudo apt install #{package}") or raise "Failed to install #{package}"
     end
 
-    def scan_for_containers
-      Dir.glob("/var/harbr/containers/*").each_with_object({}) do |container_path, hash|
-        next unless File.directory?(container_path)
-        container_name = File.basename(container_path)
-        versions = Dir.glob("#{container_path}/versions/*").select { |path| File.directory?(path) }
-        versions.each { |version_path| hash["#{container_name}/versions/#{File.basename(version_path)}"] = true }
-      end
-    end
-
-    PLACED_FILE = "/var/harbr/.placed"
-
-    def place(container, version)
-      placed_containers = File.exist?(PLACED_FILE) ? File.read(PLACED_FILE).split("\n") : []
-
-      if placed_containers.include?("#{container}/#{version}")
-        puts "Container '#{container}', Version '#{version}' is already placed."
-      else
-        puts "Placing container: '#{container}', Version: '#{version}'"
-        run_jobs(container, version)
-        File.open(PLACED_FILE, "a") { |file| file.puts("#{container}/#{version}") }
-      end
-    end
-
-    def check
-      sleep_times = [1, 3, 5, 8, 23]
-      begin
-        result = yield if block_given?
-        unless result
-          sleep_times.each do |time|
-            result = yield if block_given?
-            break if result
-            sleep(time)
-          end
-        end
-      rescue => e
-        puts "Error: #{e.message}"
-      end
-    end
-    def run_jobs(container, version)
-      check_file_exists("/var/harbr/containers/#{container}/versions/#{version}/config/manifest.yml") do
-        `harbr deploy #{container} #{version} --next`
-      end
-    end
-
-    def create_traefik_config(containers)
-      `rm -rf "/etc/traefik/harbr.toml"`
-
-      config = {
-        "http" => {
-          "routers" => {
-            "traefik-dashboard" => {
-              "rule" => "Host(`traefik.harbr.zero2one.ee`)",
-              "service" => "api@internal"
-            }
-          },
-          "services" => {}
-        }
-      }
-
-      containers.each do |container|
-        container.ip = "127.0.0.1"
-
-        config["http"]["routers"]["#{container.name}-router"] = {
-          "rule" => "Host(`#{container.host_header}`)",
-          "service" => "#{container.name}-service"
-        }
-        config["http"]["services"]["#{container.name}-service"] = {
-          "loadBalancer" => {
-            "servers" => [{"url" => "http://#{container.ip}:#{container.port}"}]
-          }
-        }
-      end
-
-      File.write("/etc/traefik/harbr.toml", TomlRB.dump(config))
-      puts "Traefik configuration written to /etc/traefik/harbr.toml"
-    end
   end
 
   desc "destroy", "Destroy a container and remove all traces"
@@ -174,33 +98,11 @@ class HarbrCLI < Thor
   def setup
     # Check and create /var/harbr directory
     check_and_create_directory("/var/harbr/containers")
-
+    check_and_create_directory("/var/dddr")
     # Check for Ruby, Traefik, and runit, and install if necessary
     install_with_snap("ruby") unless command_exists?("ruby")
     install_with_snap("traefik") unless command_exists?("traefik")
     install_with_apt("runit") unless command_exists?("runit")
-
-    run_script = <<~SCRIPT
-      #!/bin/sh
-      exec 2>&1
-      harbr monitor
-    SCRIPT
-
-    log_script = <<~SCRIPT
-      #!/bin/sh
-      exec svlogd -tt /var/log/harbr/
-    SCRIPT
-
-    write_to_file("/etc/sv/harbr/run", run_script)
-    write_to_file("/etc/sv/harbr/log/run", log_script)
-
-    `chmod +x /etc/sv/harbr/run`
-    `chmod +x /etc/sv/harbr/log/run`
-    `mkdir -p /var/log/harbr`
-    `ln -sf /etc/sv/harbr /etc/service/harbr`
-    `sv start harbr`
-    puts "Harbr service started successfully."
-
     puts "Setup completed successfully."
   end
 
@@ -256,25 +158,6 @@ class HarbrCLI < Thor
     system "gem update harbr && sv stop harbr && sv start harbr"
   end
 
-  desc "monitor", "Monitor /var/harbr/comtainers for new container versions"
-  def monitor
-    puts "version: (#{Harbr::VERSION})"
-    puts "Monitoring /var/harbr/containers for new container versions..."
-
-    last_known_state = {}
-
-    loop do
-      current_state = scan_for_containers
-      new_versions = current_state.keys - last_known_state.keys
-
-      new_versions.each do |container_version|
-        container, version = container_version.split("/versions/")
-        place(container, version)
-      end
-
-      last_known_state = current_state
-      sleep 3 # Poll every 10 seconds
-    end
-  end
 end
+
 HarbrCLI.start(ARGV)
