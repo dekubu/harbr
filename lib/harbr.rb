@@ -52,7 +52,3 @@ module Harbr
     send_notification("Harbr: #{name} failed to deploy", html_content)
   end
 end
-
-Dddr.configure do |config|
-  config.data_dir = Harbr::DEFAULT_DIRECTORY_DATA_DIR
-end
