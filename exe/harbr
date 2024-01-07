@@ -88,9 +88,7 @@ class HarbrCLI < Thor
     end
 
     def run_jobs(container, version)
-      puts "Running tasks for container: #{container}, version: #{version}"
-      Harbr::Job.perform_async(container, version, "next")
-      puts "deploy next version #{version} of #{container}"
+      `harbr deploy #{container} #{version} --next`
     end
 
     def create_traefik_config(containers)
@@ -134,7 +132,6 @@ class HarbrCLI < Thor
     container_repo = Harbr::Container::Repository.new
 
     ["live.#{name}", "next.#{name}", name].each do |container_name|
-      
       container_repo.get_by_name(container_name).each do |container|
         `port release #{container.port}`
         puts "released port #{container.port} successfully."
@@ -213,17 +210,29 @@ class HarbrCLI < Thor
   end
 
   desc "deploy", "deploy a container to production"
-  def deploy(name)
-    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/next`
-    version = $1
-    raise "Ooops! next version not found!" if version.nil?
+  method_option :live, type: :boolean, default: false, aliases: "-l", desc: "deploy to live environment"
+  method_option :next, type: :boolean, default: false, aliases: "-n", desc: "deploy to next environment"
+  def deploy(name,version=nil)
+    
+    if options[:live]
+      /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/next`
+      version = $1
+      raise "Ooops! next version not found!" if version.nil?
 
-    Harbr::Job.perform_async(name, version, "live")
+      Harbr::Job.perform_async(name, version, "live")
 
-    /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/live`
-    `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
+      /versions\/(?<version>\d*)/ =~ `ls -l /var/harbr/containers/#{name}/live`
+      `ln -sf /var/harbr/containers/#{name}/version/#{$1} /var/harbr/containers/#{name}/rollback`
 
-    puts "deploy version #{version} of #{name} to live environment"
+      puts "deploy version #{version} of #{name} to live environment"
+    end
+
+    if options[:next]
+      `ln -sf /var/harbr/containers/#{name}/version/#{version} /var/harbr/containers/#{name}/next`
+      Harbr::Job.perform_async(name, version, "next")
+      puts "deploy version #{version} of #{name} to next environment"      
+    end
+      
   end
 
   desc "rollback", "rollback last deploy"

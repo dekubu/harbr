@@ -42,7 +42,7 @@ module Harbr
     def collate_containers(name, host, port, host_header_aliases = [])
       containers = Harbr::Container::Repository.new
       container = containers.find_by_header(host)
-      
+
       if container.nil?
         container = Harbr::Container.new
         container.name = name
@@ -56,10 +56,8 @@ module Harbr
         containers.update(container)
       end
 
-      
       if host_header_aliases
         host_header_aliases.each do |host_header_alias|
-          
           container = Harbr::Container.new
           container.name = "#{name} -> #{host_header_alias}"
           container.host_header = host_header_alias
@@ -67,29 +65,25 @@ module Harbr
           container.port = port
           containers.create(container) unless containers.find_by_header(host_header_alias)
 
-          if(container.name.start_with?("live"))
+          if container.name.start_with?("live")
 
-            plain_name = host_header_alias.gsub("live.","")
+            plain_name = host_header_alias.gsub("live.", "")
             container = Harbr::Container.new
             container.name = "#{name} -> #{plain_name}"
             container.host_header = plain_name
             container.ip = "127.0.0.1"
-            container.port = port 
-
+            container.port = port
 
             unless containers.find_by_header(container.host_header)
               containers.create(container)
             end
 
           end
-
         end
       end
 
       containers.all
     end
-
-
 
     def write_to_file(path, contents)
       dirname = File.dirname(path)
@@ -117,7 +111,7 @@ module Harbr
     private
 
     def remove_dot_from_string(str)
-      str.sub('.', '')
+      str.sub(".", "")
     end
 
     def check_file_exists(path)
@@ -159,14 +153,14 @@ module Harbr
 
       if env == "live"
         `rm -f /var/harbr/containers/#{name}/live` if Dir.exist?("/var/harbr/containers/#{name}/live")
-        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/live`                
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/live`
       end
-      
+
       if env == "next"
         `rm -f /var/harbr/containers/#{name}/next` if Dir.exist?("/var/harbr/containers/#{name}/next")
-        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next`                
+        `ln -sf /var/harbr/containers/#{name}/versions/#{version} /var/harbr/containers/#{name}/next`
       end
-      
+
       bundle_install_if_needed(version_path)
 
       create_runit_scripts(name, port, env)
