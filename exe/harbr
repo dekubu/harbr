@@ -187,7 +187,7 @@ class HarbrCLI < Thor
 
     if options[:next]
       `ln -sf /var/harbr/containers/#{name}/version/#{version} /var/harbr/containers/#{name}/next`
-      Harbr::Joarbr::Lxd::Job.perform_async(name, 9292, "next")
+      Harbr::Lxd::Job.perform_async(name, 9292, "next")
       puts "deploy version #{version} of #{name} to next environment"
     end
   end
